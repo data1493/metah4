@@ -1,5 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
-import * as sodium from 'libsodium-wrappers'
+import { useState, useRef } from 'react'
 import axios from 'axios'
 import ResultCard from './components/ResultCard'
 
@@ -17,7 +16,6 @@ interface BraveWebResult {
 }
 
 function App() {
-  const [sodiumReady, setSodiumReady] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
@@ -27,17 +25,16 @@ function App() {
   const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    sodium.ready.then(() => setSodiumReady(true)).catch(() => setSodiumReady(true))
-  }, [])
-
-  const hashQuery = (q: string): string => {
-    const hash = sodium.crypto_hash_sha256(sodium.from_string(q))
-    return sodium.to_hex(hash)
+  const hashQuery = async (q: string): Promise<string> => {
+    const data = new TextEncoder().encode(q)
+    const buffer = await crypto.subtle.digest('SHA-256', data)
+    return Array.from(new Uint8Array(buffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
   }
 
   const handleSearch = async () => {
-    if (!sodiumReady || !query.trim()) return
+    if (!query.trim()) return
 
     const apiKey = import.meta.env.VITE_BRAVE_SEARCH_API_KEY
     if (!apiKey || apiKey === 'your_brave_api_key_here') {
@@ -45,7 +42,7 @@ function App() {
       return
     }
 
-    const hash = hashQuery(query.trim())
+    const hash = await hashQuery(query.trim())
     setHashValue(hash)
     setHashed(true)
     setLoading(true)
@@ -105,10 +102,10 @@ function App() {
           />
           <button
             onClick={handleSearch}
-            disabled={!sodiumReady || !query.trim()}
+            disabled={!query.trim()}
             className="px-6 py-3 bg-neon-green text-deep-black font-black text-sm rounded disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neon-purple hover:text-white transition-colors duration-200"
           >
-            {sodiumReady ? 'GO' : '...'}
+            GO
           </button>
         </div>
 
