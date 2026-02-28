@@ -1,34 +1,175 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState, useRef } from 'react'
+import * as sodium from 'libsodium-wrappers'
+import axios from 'axios'
+import ResultCard from './components/ResultCard'
+
+interface SearchResult {
+  title: string
+  url: string
+  snippet: string
+}
+
+const parseUrl = (rawHref: string): string => {
+  if (!rawHref) return ''
+  if (rawHref.startsWith('http')) return rawHref
+  try {
+    const full = new URL(rawHref, 'https://lite.duckduckgo.com')
+    const uddg = full.searchParams.get('uddg')
+    return uddg ? decodeURIComponent(uddg) : full.href
+  } catch {
+    return rawHref
+  }
+}
+
+const parseResults = (html: string): SearchResult[] => {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, 'text/html')
+  const results: SearchResult[] = []
+
+  doc.querySelectorAll('a.result-link').forEach((link) => {
+    const rawHref = link.getAttribute('href') || ''
+    const url = parseUrl(rawHref)
+    const title = link.textContent?.trim() || ''
+    let snippet = ''
+
+    const row = link.closest('tr')
+    if (row) {
+      let sibling = row.nextElementSibling
+      while (sibling) {
+        const snippetEl = sibling.querySelector('.result-snippet')
+        if (snippetEl) {
+          snippet = snippetEl.textContent?.trim() || ''
+          break
+        }
+        sibling = sibling.nextElementSibling
+      }
+    }
+
+    if (title) results.push({ title, url, snippet })
+  })
+
+  return results
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [sodiumReady, setSodiumReady] = useState(false)
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [loading, setLoading] = useState(false)
+  const [hashValue, setHashValue] = useState('')
+  const [hashVisible, setHashVisible] = useState(false)
+  const [error, setError] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    sodium.ready.then(() => setSodiumReady(true)).catch(() => setSodiumReady(true))
+  }, [])
+
+  const hashQuery = (q: string): string => {
+    const hash = sodium.crypto_hash_sha256(sodium.from_string(q))
+    return sodium.to_hex(hash)
+  }
+
+  const handleSearch = async () => {
+    if (!sodiumReady || !query.trim()) return
+
+    const hash = hashQuery(query.trim())
+    setHashValue(hash)
+    setHashVisible(true)
+    setLoading(true)
+    setResults([])
+    setError('')
+
+    try {
+      const response = await axios.get('/api/search', {
+        params: { q: query.trim() },
+      })
+      const parsed = parseResults(response.data as string)
+      setResults(parsed)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'search failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSearch()
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
+    <div className="min-h-screen bg-deep-black flex flex-col font-mono pb-16">
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-12">
+        <h1 className="text-7xl md:text-9xl font-black text-center text-neon-green glitch-text font-display mb-2 tracking-tight select-none">
+          METAH4
+        </h1>
+        <p className="text-center text-neon-purple text-sm mb-10 tracking-widest uppercase">
+          privacy-first search engine
         </p>
+
+        <div className="flex gap-2 mb-4">
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="search the underground..."
+            className="flex-1 bg-card-bg border border-neon-green text-neon-green px-4 py-3 rounded focus:outline-none focus:border-neon-purple focus:ring-1 focus:ring-neon-purple font-mono text-sm"
+            style={{ '--tw-placeholder-color': 'rgb(57 255 20 / 0.4)' } as React.CSSProperties}
+          />
+          <button
+            onClick={handleSearch}
+            disabled={!sodiumReady || !query.trim()}
+            className="px-6 py-3 bg-neon-green text-deep-black font-black text-sm rounded disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neon-purple hover:text-white transition-colors duration-200"
+          >
+            {sodiumReady ? 'GO' : '...'}
+          </button>
+        </div>
+
+        {hashVisible && (
+          <div className="flex items-center gap-3 mb-8 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neon-green/10 border border-neon-green text-neon-green text-xs animate-pulse">
+              <span className="w-2 h-2 rounded-full bg-neon-green inline-block" />
+              hashed on device
+            </span>
+            <span className="text-neon-gold/60 text-xs font-mono">
+              {hashValue.slice(0, 16)}…
+            </span>
+          </div>
+        )}
+
+        {loading && (
+          <div className="text-center py-16">
+            <span className="text-neon-green text-3xl glitch-text tracking-widest">
+              SEARCHING...
+            </span>
+          </div>
+        )}
+
+        {error && (
+          <div className="text-center py-10 text-red-400 text-sm tracking-wide border border-red-400/30 rounded p-4">
+            error: {error}
+          </div>
+        )}
+
+        {!loading && !error && hashVisible && results.length === 0 && (
+          <div className="text-center py-10 text-neon-purple/60 text-sm tracking-wide">
+            no results found
+          </div>
+        )}
+
+        <div className="space-y-4">
+          {results.map((r, i) => (
+            <ResultCard key={i} result={r} hash={hashValue} index={i} />
+          ))}
+        </div>
+      </main>
+
+      <div className="fixed bottom-0 left-0 right-0 bg-card-bg border-t border-neon-purple/40 py-2 text-center text-neon-purple/70 text-xs tracking-wider">
+        Protected by NordVPN — affiliate link coming
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
