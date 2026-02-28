@@ -5,8 +5,8 @@
   --color-neon-green: #39ff14;
   --color-neon-purple: #d400ff;
   --color-neon-gold: #ffd700;
-  --color-deep-black: #050505;
-  --color-card-bg: #0d0d0d;
+  --color-deep-black: #0a0a0a;
+  --color-card-bg: #111111;
 
   --font-mono: 'JetBrains Mono', monospace;
   --font-display: 'Rubik', sans-serif;
@@ -29,7 +29,7 @@
 }
 
 body {
-  background-color: #050505;
+  background-color: #0a0a0a;
   color: #f0f0f0;
   font-family: 'JetBrains Mono', monospace;
   -webkit-font-smoothing: antialiased;
@@ -42,7 +42,7 @@ body {
 }
 
 .card {
-  background-color: #0d0d0d;
+  background-color: #111111;
   border: 1px solid #39ff14;
   border-radius: 0.5rem;
   padding: 1rem;

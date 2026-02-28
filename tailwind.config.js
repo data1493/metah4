@@ -6,8 +6,8 @@ export default {
         'neon-green': '#39ff14',
         'neon-purple': '#d400ff',
         'neon-gold': '#ffd700',
-        'deep-black': '#050505',
-        'card-bg': '#0d0d0d',
+        'deep-black': '#0a0a0a',
+        'card-bg': '#111111',
       },
       fontFamily: {
         mono: ['JetBrains Mono', 'monospace'],

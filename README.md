@@ -8,11 +8,37 @@ Privacy-first search engine. Queries are SHA-256 hashed on-device before being s
 - Vite 7 with `@tailwindcss/vite` (Tailwind v4)
 - libsodium-wrappers — client-side SHA-256 hashing
 - Axios — HTTP client
-- DuckDuckGo Lite — search backend (proxied via Vite dev server)
+- Brave Search API — web search backend
 
 ## Design
 
-Neon/hip-hop aesthetic: deep black background, neon green (`#39ff14`), neon purple (`#d400ff`), neon gold (`#ffd700`). Rubik (display) + JetBrains Mono fonts. Glitch animations. Cassette-card result layout.
+Neon/hip-hop aesthetic: deep black background (`#0a0a0a`), neon green (`#39ff14`), neon purple (`#d400ff`), neon gold (`#ffd700`). Rubik (display) + JetBrains Mono fonts. Glitch animations. Cassette-card result layout.
+
+## Brave Search API Integration
+
+Metah4 uses the [Brave Search API](https://brave.com/search/api/) for real web search results.
+
+### Setup
+
+1. Get a free API key at https://brave.com/search/api/ (2,000 queries/month free)
+2. Create `.env` at the project root:
+
+```
+VITE_BRAVE_SEARCH_API_KEY=your_key_here
+```
+
+3. Run the dev server:
+
+```bash
+npm install
+npm run dev
+```
+
+The `VITE_` prefix is required for Vite to expose the variable to the browser bundle.
+
+### Client-side Hashing Badge
+
+Every search triggers a SHA-256 hash of the query using libsodium-wrappers **before** any network request is made. The green "hashed on device" badge confirms this happened locally. This is a demo of the privacy-first flow — in production the key would live on a backend proxy so it never reaches the client.
 
 ## Dev
 
@@ -21,10 +47,4 @@ npm install
 npm run dev
 ```
 
-Opens at `http://localhost:5173`. The Vite dev server proxies `/api/search` → `https://lite.duckduckgo.com/lite/` to avoid CORS.
-
-## Status
-
-- UI: complete — dark neon layout, glitch title, search input, cassette result cards, hashed-on-device badge, NordVPN banner placeholder
-- Search: in progress — proxy and HTML parsing wired up, DDG Lite result parsing under active development
-- Hashing: working — SHA-256 via libsodium-wrappers runs fully on-device before any network call
+See `workflow.md` for the full development workflow and notes on moving the API key to a backend for production.

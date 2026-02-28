@@ -5,50 +5,15 @@ import ResultCard from './components/ResultCard'
 
 interface SearchResult {
   title: string
+  description: string
   url: string
-  snippet: string
+  hash: string
 }
 
-const parseUrl = (rawHref: string): string => {
-  if (!rawHref) return ''
-  if (rawHref.startsWith('http')) return rawHref
-  try {
-    const full = new URL(rawHref, 'https://lite.duckduckgo.com')
-    const uddg = full.searchParams.get('uddg')
-    return uddg ? decodeURIComponent(uddg) : full.href
-  } catch {
-    return rawHref
-  }
-}
-
-const parseResults = (html: string): SearchResult[] => {
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(html, 'text/html')
-  const results: SearchResult[] = []
-
-  doc.querySelectorAll('a.result-link').forEach((link) => {
-    const rawHref = link.getAttribute('href') || ''
-    const url = parseUrl(rawHref)
-    const title = link.textContent?.trim() || ''
-    let snippet = ''
-
-    const row = link.closest('tr')
-    if (row) {
-      let sibling = row.nextElementSibling
-      while (sibling) {
-        const snippetEl = sibling.querySelector('.result-snippet')
-        if (snippetEl) {
-          snippet = snippetEl.textContent?.trim() || ''
-          break
-        }
-        sibling = sibling.nextElementSibling
-      }
-    }
-
-    if (title) results.push({ title, url, snippet })
-  })
-
-  return results
+interface BraveWebResult {
+  title: string
+  description?: string
+  url: string
 }
 
 function App() {
@@ -56,8 +21,9 @@ function App() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
+  const [hashed, setHashed] = useState(false)
   const [hashValue, setHashValue] = useState('')
-  const [hashVisible, setHashVisible] = useState(false)
+  const [apiKeyError, setApiKeyError] = useState(false)
   const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -73,19 +39,33 @@ function App() {
   const handleSearch = async () => {
     if (!sodiumReady || !query.trim()) return
 
+    const apiKey = import.meta.env.VITE_BRAVE_SEARCH_API_KEY
+    if (!apiKey || apiKey === 'your_brave_api_key_here') {
+      setApiKeyError(true)
+      return
+    }
+
     const hash = hashQuery(query.trim())
     setHashValue(hash)
-    setHashVisible(true)
+    setHashed(true)
     setLoading(true)
     setResults([])
     setError('')
+    setApiKeyError(false)
 
     try {
-      const response = await axios.get('/api/search', {
-        params: { q: query.trim() },
+      const response = await axios.get('/api/brave', {
+        params: { q: query.trim(), count: 10 },
       })
-      const parsed = parseResults(response.data as string)
-      setResults(parsed)
+      const webResults: BraveWebResult[] = response.data?.web?.results ?? []
+      setResults(
+        webResults.map((r) => ({
+          title: r.title,
+          description: r.description ?? '',
+          url: r.url,
+          hash,
+        }))
+      )
     } catch (e) {
       setError(e instanceof Error ? e.message : 'search failed')
     } finally {
@@ -107,6 +87,12 @@ function App() {
           privacy-first search engine
         </p>
 
+        {apiKeyError && (
+          <div className="mb-6 px-4 py-3 rounded border border-red-500 bg-red-500/10 text-red-400 text-xs text-center tracking-wide">
+            no api key — add VITE_BRAVE_SEARCH_API_KEY to .env and restart the dev server
+          </div>
+        )}
+
         <div className="flex gap-2 mb-4">
           <input
             ref={inputRef}
@@ -116,7 +102,6 @@ function App() {
             onKeyDown={handleKeyDown}
             placeholder="search the underground..."
             className="flex-1 bg-card-bg border border-neon-green text-neon-green px-4 py-3 rounded focus:outline-none focus:border-neon-purple focus:ring-1 focus:ring-neon-purple font-mono text-sm"
-            style={{ '--tw-placeholder-color': 'rgb(57 255 20 / 0.4)' } as React.CSSProperties}
           />
           <button
             onClick={handleSearch}
@@ -127,7 +112,7 @@ function App() {
           </button>
         </div>
 
-        {hashVisible && (
+        {hashed && (
           <div className="flex items-center gap-3 mb-8 flex-wrap">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neon-green/10 border border-neon-green text-neon-green text-xs animate-pulse">
               <span className="w-2 h-2 rounded-full bg-neon-green inline-block" />
@@ -148,12 +133,12 @@ function App() {
         )}
 
         {error && (
-          <div className="text-center py-10 text-red-400 text-sm tracking-wide border border-red-400/30 rounded p-4">
+          <div className="text-center py-6 text-red-400 text-sm border border-red-400/30 rounded p-4">
             error: {error}
           </div>
         )}
 
-        {!loading && !error && hashVisible && results.length === 0 && (
+        {!loading && !error && !apiKeyError && hashed && results.length === 0 && (
           <div className="text-center py-10 text-neon-purple/60 text-sm tracking-wide">
             no results found
           </div>
@@ -161,7 +146,7 @@ function App() {
 
         <div className="space-y-4">
           {results.map((r, i) => (
-            <ResultCard key={i} result={r} hash={hashValue} index={i} />
+            <ResultCard key={i} result={r} index={i} />
           ))}
         </div>
       </main>
