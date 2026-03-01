@@ -34,7 +34,7 @@ function ResultCard({ result, index }: Props) {
           {result.url}
         </a>
       </div>
-      <p className="text-gray-200 text-sm leading-relaxed">{result.description}</p>
+      <p className="text-gray-200 text-base leading-relaxed">{result.description}</p>
     </div>
   )
 }
