@@ -14,11 +14,11 @@ function ResultCard({ result, index }: Props) {
   const isEven = index % 2 === 0
   const titleColor = isEven ? 'text-neon-purple' : 'text-neon-gold'
   const titleHoverColor = isEven ? 'hover:text-neon-gold' : 'hover:text-neon-purple'
-  const borderColor = isEven ? 'border-neon-gold' : 'border-neon-purple'
+  const pulseBorder = isEven ? 'pulse-border-gold' : 'pulse-border-purple'
 
   return (
     <div
-      className={`card animate-fade-in border ${borderColor} p-6`}
+      className={`card animate-fade-in ${pulseBorder} p-6`}
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <a

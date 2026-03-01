@@ -47,3 +47,64 @@ body {
   padding: 1rem;
   overflow: visible;
 }
+
+@keyframes borderRotate {
+  0% { --border-angle: 0deg; }
+  100% { --border-angle: 360deg; }
+}
+
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.pulse-border-gold {
+  position: relative;
+  background: #111111;
+  border: 1px solid rgba(255, 215, 0, 0.4) !important;
+}
+
+.pulse-border-gold::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 0.6rem;
+  background: conic-gradient(from var(--border-angle), #ffd700 0%, transparent 15%, transparent 85%, #ffd700 100%);
+  animation: borderRotate 3s linear infinite;
+  z-index: -1;
+}
+
+.pulse-border-gold::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0.5rem;
+  background: #111111;
+  z-index: -1;
+}
+
+.pulse-border-purple {
+  position: relative;
+  background: #111111;
+  border: 1px solid rgba(212, 0, 255, 0.4) !important;
+}
+
+.pulse-border-purple::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 0.6rem;
+  background: conic-gradient(from var(--border-angle), #d400ff 0%, transparent 15%, transparent 85%, #d400ff 100%);
+  animation: borderRotate 3s linear infinite;
+  z-index: -1;
+}
+
+.pulse-border-purple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0.5rem;
+  background: #111111;
+  z-index: -1;
+}
