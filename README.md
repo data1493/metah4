@@ -12,7 +12,7 @@ Privacy-first search engine. Queries are SHA-256 hashed on-device before being s
 
 ## Design
 
-Neon/hip-hop aesthetic: deep black background (`#0a0a0a`), neon green (`#39ff14`), neon purple (`#d400ff`), neon gold (`#ffd700`). Rubik (display) + JetBrains Mono fonts. Glitch animations. Cassette-card result layout.
+Lakers-themed aesthetic: deep black background (`#0a0a0a`), Lakers purple (`#542583`), Lakers gold (`#FDB927`). Rubik (display) + JetBrains Mono fonts. Glitch animations. Cassette-card result layout.
 
 ## Brave Search API Integration
 

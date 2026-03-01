@@ -97,12 +97,12 @@ function App() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="search the underground..."
-            className="flex-1 bg-card-bg border border-neon-green text-neon-green px-4 py-3 rounded focus:outline-none focus:border-neon-purple focus:ring-1 focus:ring-neon-purple font-mono text-sm"
+            className="flex-1 bg-card-bg border border-neon-gold text-neon-gold px-4 py-3 rounded focus:outline-none focus:border-neon-purple focus:ring-1 focus:ring-neon-purple font-mono text-sm"
           />
           <button
             onClick={handleSearch}
             disabled={!query.trim()}
-            className="px-6 py-3 bg-neon-green text-deep-black font-black text-sm rounded disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neon-purple hover:text-white transition-colors duration-200"
+            className="px-6 py-3 bg-neon-purple text-white font-black text-sm rounded disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neon-gold hover:text-deep-black transition-colors duration-200"
           >
             GO
           </button>
@@ -111,7 +111,7 @@ function App() {
         <div className="flex items-center gap-4 mb-4">
           <button
             onClick={() => setShowProofModal(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-neon-green/20 hover:bg-neon-green/40 rounded-full text-xs font-medium text-neon-green transition-all border border-neon-green/40"
+            className="flex items-center gap-2 px-3 py-1.5 bg-neon-purple/20 hover:bg-neon-purple/40 rounded-full text-xs font-medium text-neon-purple transition-all border border-neon-purple/40"
             title="Click to see privacy proof"
           >
             <span className="w-3 h-3 rounded-full bg-neon-green animate-pulse" />
@@ -120,8 +120,8 @@ function App() {
 
           {hashed && (
             <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neon-green/10 border border-neon-green text-neon-green text-xs animate-pulse">
-                <span className="w-2 h-2 rounded-full bg-neon-green inline-block" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neon-gold/10 border border-neon-gold text-neon-gold text-xs animate-pulse">
+                <span className="w-2 h-2 rounded-full bg-neon-gold inline-block" />
                 hashed on device
               </span>
               <span className="text-neon-gold/60 text-xs font-mono">
@@ -133,7 +133,7 @@ function App() {
 
         {loading && (
           <div className="text-center py-16">
-            <span className="text-neon-green text-3xl glitch-text tracking-widest">
+            <span className="text-neon-gold text-3xl glitch-text tracking-widest">
               SEARCHING...
             </span>
           </div>
@@ -172,7 +172,7 @@ function App() {
               Your search query was hashed on-device using SHA-256. Nothing — not even the raw text — left your computer. Brave API only sees the hash if we ever send it (we don't). Zero logs. Zero tracking.
             </p>
             {hashed && results[0]?.hash && (
-              <div className="bg-black/60 p-4 rounded-lg font-mono text-xs break-all text-neon-green/90">
+              <div className="bg-black/60 p-4 rounded-lg font-mono text-xs break-all text-neon-gold/90">
                 SHA-256: {results[0].hash}
               </div>
             )}

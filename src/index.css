@@ -16,11 +16,11 @@
 }
 
 @keyframes glitch {
-  0%   { text-shadow: 2px 0 #39ff14, -2px 0 #d400ff; }
-  25%  { text-shadow: -2px 0 #39ff14, 2px 0 #d400ff; }
-  50%  { text-shadow: 2px 2px #ffd700, -2px -2px #d400ff; }
-  75%  { text-shadow: -2px 2px #d400ff, 2px -2px #39ff14; }
-  100% { text-shadow: 2px 0 #39ff14, -2px 0 #d400ff; }
+  0%   { text-shadow: 2px 0 #FDB927, -2px 0 #542583; }
+  25%  { text-shadow: -2px 0 #FDB927, 2px 0 #542583; }
+  50%  { text-shadow: 2px 2px #FDB927, -2px -2px #542583; }
+  75%  { text-shadow: -2px 2px #542583, 2px -2px #FDB927; }
+  100% { text-shadow: 2px 0 #FDB927, -2px 0 #542583; }
 }
 
 @keyframes fadeIn {
@@ -43,7 +43,7 @@ body {
 
 .card {
   background-color: #111111;
-  border: 1px solid #39ff14;
+  border: 1px solid #FDB927;
   border-radius: 0.5rem;
   padding: 1rem;
 }

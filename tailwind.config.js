@@ -3,9 +3,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        'neon-green': '#39ff14',
-        'neon-purple': '#d400ff',
-        'neon-gold': '#ffd700',
+        'neon-green': '#FDB927', // Lakers gold
+        'neon-purple': '#542583', // Lakers purple
+        'neon-gold': '#FDB927',
         'deep-black': '#0a0a0a',
         'card-bg': '#111111',
       },
@@ -19,11 +19,11 @@ export default {
       },
       keyframes: {
         glitch: {
-          '0%':   { textShadow: '2px 0 #39ff14, -2px 0 #d400ff' },
-          '25%':  { textShadow: '-2px 0 #39ff14, 2px 0 #d400ff' },
-          '50%':  { textShadow: '2px 2px #ffd700, -2px -2px #d400ff' },
-          '75%':  { textShadow: '-2px 2px #d400ff, 2px -2px #39ff14' },
-          '100%': { textShadow: '2px 0 #39ff14, -2px 0 #d400ff' },
+          '0%':   { textShadow: '2px 0 #FDB927, -2px 0 #542583' },
+          '25%':  { textShadow: '-2px 0 #FDB927, 2px 0 #542583' },
+          '50%':  { textShadow: '2px 2px #FDB927, -2px -2px #542583' },
+          '75%':  { textShadow: '-2px 2px #542583, 2px -2px #FDB927' },
+          '100%': { textShadow: '2px 0 #FDB927, -2px 0 #542583' },
         },
         fadeIn: {
           from: { opacity: '0', transform: 'translateY(10px)' },

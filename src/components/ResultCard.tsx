@@ -27,7 +27,7 @@ function ResultCard({ result, index }: Props) {
       >
         {result.title}
       </a>
-      <div className="text-neon-green/70 text-xs truncate mb-2">
+      <div className="text-neon-gold/70 text-xs truncate mb-2">
         <a href={result.url} target="_blank" rel="noopener noreferrer">
           {result.url}
         </a>
