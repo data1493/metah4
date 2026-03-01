@@ -6,7 +6,7 @@ export default {
         'neon-green': '#FDB927', // Lakers gold
         'neon-purple': '#542583', // Lakers purple
         'neon-gold': '#FDB927',
-        'deep-black': '#0a0a0a',
+        'deep-black': '#1a0a1a',
         'card-bg': '#111111',
       },
       fontFamily: {

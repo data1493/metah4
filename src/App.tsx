@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import axios from 'axios'
 import ResultCard from './components/ResultCard'
 
@@ -27,6 +27,17 @@ function App() {
   const [showLogsModal, setShowLogsModal] = useState(false)
   const [logs, setLogs] = useState<{timestamp: Date, message: string}[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (showProofModal || showLogsModal) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [showProofModal, showLogsModal])
 
   const hashQuery = async (q: string): Promise<string> => {
     const data = new TextEncoder().encode(q)
