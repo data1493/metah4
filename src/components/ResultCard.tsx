@@ -13,7 +13,7 @@ interface Props {
 function ResultCard({ result, index }: Props) {
   return (
     <div
-      className="card animate-fade-in"
+      className={`card animate-fade-in border ${index % 2 === 0 ? 'border-neon-gold' : 'border-neon-purple'}`}
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <div className="text-neon-gold/50 text-xs font-mono mb-2 truncate">
@@ -23,7 +23,7 @@ function ResultCard({ result, index }: Props) {
         href={result.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-neon-gold font-bold text-sm hover:text-neon-purple transition-colors duration-200 block mb-1 break-words"
+        className={`text-${index % 2 === 0 ? 'neon-purple' : 'neon-gold'} font-bold text-sm hover:text-${index % 2 === 0 ? 'neon-gold' : 'neon-purple'} transition-colors duration-200 block mb-1 break-words`}
       >
         {result.title}
       </a>
