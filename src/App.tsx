@@ -100,7 +100,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-deep-black flex flex-col font-mono pb-16">
+    <div className="min-h-screen bg-deep-black flex flex-col pb-16">
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-12">
         <img src="/images/logo1.png" alt="METAH4" className="h-24 md:h-36 mx-auto mb-2" />
         <p className="text-center text-neon-purple text-sm mb-10 tracking-widest uppercase">
