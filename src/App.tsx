@@ -56,7 +56,7 @@ function App() {
       return
     }
 
-    const newLogs = []
+    const newLogs: {timestamp: Date, message: string}[] = []
     newLogs.push({ timestamp: new Date(), message: `Query received: "${query.trim()}"` })
     newLogs.push({ timestamp: new Date(), message: 'Starting SHA-256 hash on device...' })
 
@@ -71,7 +71,7 @@ function App() {
     setResults([])
     setError('')
     setApiKeyError(false)
-    setLogs(newLogs)
+    setLogs(prev => [...prev, ...newLogs])
 
     try {
       const response = await axios.get('/api/brave', {
@@ -229,7 +229,10 @@ function App() {
             <p className="text-gray-300 mb-4">
               Your digital paper trail - proving privacy in plain sight. Every step logged locally, nothing sent externally without your knowledge.
             </p>
-            <div className="bg-black/60 p-4 rounded-lg max-h-64 overflow-y-auto font-mono text-xs space-y-2">
+            <div 
+              className="bg-black/60 p-4 rounded-lg font-mono text-xs space-y-2"
+              style={{ maxHeight: '256px', overflowY: 'scroll', overscrollBehavior: 'contain' }}
+            >
               {logs.map((log, i) => (
                 <div key={i} className="text-neon-gold/90">
                   <span className="text-neon-purple/70">{log.timestamp.toLocaleTimeString()}</span> {log.message}
