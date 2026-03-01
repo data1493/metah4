@@ -11,25 +11,30 @@ interface Props {
 }
 
 function ResultCard({ result, index }: Props) {
+  const isEven = index % 2 === 0
+  const titleColor = isEven ? 'text-neon-purple' : 'text-neon-gold'
+  const titleHoverColor = isEven ? 'hover:text-neon-gold' : 'hover:text-neon-purple'
+  const borderColor = isEven ? 'border-neon-gold' : 'border-neon-purple'
+
   return (
     <div
-      className={`card animate-fade-in border ${index % 2 === 0 ? 'border-neon-gold' : 'border-neon-purple'}`}
+      className={`card animate-fade-in border ${borderColor} p-6`}
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <a
         href={result.url}
         target="_blank"
         rel="noopener noreferrer"
-        className={`text-${index % 2 === 0 ? 'neon-purple' : 'neon-gold'} font-bold text-sm hover:text-${index % 2 === 0 ? 'neon-gold' : 'neon-purple'} transition-colors duration-200 block mb-1 break-words`}
+        className={`${titleColor} font-bold text-lg ${titleHoverColor} transition-colors duration-200 block mb-2 break-words leading-tight`}
       >
         {result.title}
       </a>
-      <div className="text-neon-gold/70 text-xs truncate mb-2">
-        <a href={result.url} target="_blank" rel="noopener noreferrer">
+      <div className="text-neon-gold/80 text-sm mb-3 break-all">
+        <a href={result.url} target="_blank" rel="noopener noreferrer" className="hover:text-neon-gold transition-colors">
           {result.url}
         </a>
       </div>
-      <p className="text-gray-300 text-xs leading-relaxed">{result.description}</p>
+      <p className="text-gray-200 text-sm leading-relaxed">{result.description}</p>
     </div>
   )
 }

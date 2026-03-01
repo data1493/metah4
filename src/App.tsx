@@ -184,7 +184,7 @@ function App() {
           </div>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           {results.map((r, i) => (
             <ResultCard key={i} result={r} index={i} />
           ))}
