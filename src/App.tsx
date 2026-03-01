@@ -124,8 +124,8 @@ function App() {
                 <span className="w-2 h-2 rounded-full bg-neon-gold inline-block" />
                 hashed on device
               </span>
-              <span className="text-neon-gold/60 text-xs font-mono">
-                {hashValue.slice(0, 16)}…
+              <span className="text-neon-gold/60 text-xs font-mono break-all">
+                {hashValue}
               </span>
             </div>
           )}

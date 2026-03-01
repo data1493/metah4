@@ -16,9 +16,6 @@ function ResultCard({ result, index }: Props) {
       className={`card animate-fade-in border ${index % 2 === 0 ? 'border-neon-gold' : 'border-neon-purple'}`}
       style={{ animationDelay: `${index * 80}ms` }}
     >
-      <div className="text-neon-gold/50 text-xs font-mono mb-2 truncate">
-        sha256: {result.hash.slice(0, 32)}…
-      </div>
       <a
         href={result.url}
         target="_blank"
