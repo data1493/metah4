@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import axios from 'axios'
 import ResultCard from './components/ResultCard'
+import Logo from './components/Logo'
 
 interface SearchResult {
   title: string
@@ -14,6 +15,12 @@ interface BraveWebResult {
   description?: string
   url: string
 }
+
+const logoList = [
+  '/images/logo1.png',
+  '/images/logo2.png',
+  // Add more logos here as you add them, e.g., '/images/lakerslogo.png', '/images/camoflaugelogo.png'
+]
 
 function App() {
   const [query, setQuery] = useState('')
@@ -77,6 +84,7 @@ function App() {
   return (
     <div className="min-h-screen bg-deep-black flex flex-col font-mono pb-16">
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-12">
+        <Logo logos={logoList} />
         <h1 className="text-7xl md:text-9xl font-black text-center text-neon-green glitch-text font-display mb-2 tracking-tight select-none">
           METAH4
         </h1>
