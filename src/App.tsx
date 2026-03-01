@@ -24,6 +24,8 @@ function App() {
   const [apiKeyError, setApiKeyError] = useState(false)
   const [error, setError] = useState('')
   const [showProofModal, setShowProofModal] = useState(false)
+  const [showLogsModal, setShowLogsModal] = useState(false)
+  const [logs, setLogs] = useState<{timestamp: Date, message: string}[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
 
   const hashQuery = async (q: string): Promise<string> => {
@@ -43,13 +45,22 @@ function App() {
       return
     }
 
+    const newLogs = []
+    newLogs.push({ timestamp: new Date(), message: `Query received: "${query.trim()}"` })
+    newLogs.push({ timestamp: new Date(), message: 'Starting SHA-256 hash on device...' })
+
     const hash = await hashQuery(query.trim())
+
+    newLogs.push({ timestamp: new Date(), message: `Hash completed: ${hash.slice(0, 16)}...` })
+    newLogs.push({ timestamp: new Date(), message: 'Sending hashed query to secure API...' })
+
     setHashValue(hash)
     setHashed(true)
     setLoading(true)
     setResults([])
     setError('')
     setApiKeyError(false)
+    setLogs(newLogs)
 
     try {
       const response = await axios.get('/api/brave', {
@@ -64,8 +75,10 @@ function App() {
           hash: i === 0 ? hash : '',
         }))
       )
+      setLogs(prev => [...prev, { timestamp: new Date(), message: 'Search results received and displayed' }])
     } catch (e) {
       setError(e instanceof Error ? e.message : 'search failed')
+      setLogs(prev => [...prev, { timestamp: new Date(), message: `Error: ${e instanceof Error ? e.message : 'search failed'}` }])
     } finally {
       setLoading(false)
     }
@@ -114,8 +127,17 @@ function App() {
             className="flex items-center gap-2 px-3 py-1.5 bg-neon-purple/20 hover:bg-neon-purple/40 rounded-full text-xs font-medium text-neon-purple transition-all border border-neon-purple/40"
             title="Click to see privacy proof"
           >
-            <span className="w-3 h-3 rounded-full bg-neon-green animate-pulse" />
+            <span className="w-3 h-3 rounded-full bg-neon-purple animate-pulse" />
             Privacy Proof
+          </button>
+
+          <button
+            onClick={() => setShowLogsModal(true)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-neon-gold/20 hover:bg-neon-gold/40 rounded-full text-xs font-medium text-neon-gold transition-all border border-neon-gold/40"
+            title="View activity logs"
+          >
+            <span className="w-3 h-3 rounded-full bg-neon-gold animate-pulse" />
+            View Logs
           </button>
 
           {hashed && (
@@ -179,6 +201,30 @@ function App() {
             <p className="mt-6 text-xs opacity-70">
               Built with libsodium-wrappers. Auditable. No backend. No bullshit.
             </p>
+          </div>
+        </div>
+      )}
+
+      {showLogsModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in">
+          <div className="card max-w-lg w-full p-8 relative">
+            <button
+              onClick={() => setShowLogsModal(false)}
+              className="absolute top-4 right-4 text-neon-purple hover:text-neon-green"
+            >
+              ×
+            </button>
+            <h2 className="text-2xl font-bold glitch-text mb-6">Activity Logs</h2>
+            <p className="text-gray-300 mb-4">
+              Your digital paper trail - proving privacy in plain sight. Every step logged locally, nothing sent externally without your knowledge.
+            </p>
+            <div className="bg-black/60 p-4 rounded-lg max-h-64 overflow-y-auto font-mono text-xs space-y-2">
+              {logs.map((log, i) => (
+                <div key={i} className="text-neon-gold/90">
+                  <span className="text-neon-purple/70">{log.timestamp.toLocaleTimeString()}</span> {log.message}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
