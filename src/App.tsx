@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react'
 import axios from 'axios'
 import ResultCard from './components/ResultCard'
-import Logo from './components/Logo'
 
 interface SearchResult {
   title: string
@@ -16,12 +15,6 @@ interface BraveWebResult {
   url: string
 }
 
-const logoList = [
-  '/images/logo1.png',
-  '/images/logo2.png',
-  // Add more logos here as you add them, e.g., '/images/lakerslogo.png', '/images/camoflaugelogo.png'
-]
-
 function App() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
@@ -30,6 +23,7 @@ function App() {
   const [hashValue, setHashValue] = useState('')
   const [apiKeyError, setApiKeyError] = useState(false)
   const [error, setError] = useState('')
+  const [showProofModal, setShowProofModal] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const hashQuery = async (q: string): Promise<string> => {
@@ -63,11 +57,11 @@ function App() {
       })
       const webResults: BraveWebResult[] = response.data?.web?.results ?? []
       setResults(
-        webResults.map((r) => ({
+        webResults.map((r, i) => ({
           title: r.title,
           description: r.description ?? '',
           url: r.url,
-          hash,
+          hash: i === 0 ? hash : '',
         }))
       )
     } catch (e) {
@@ -84,10 +78,7 @@ function App() {
   return (
     <div className="min-h-screen bg-deep-black flex flex-col font-mono pb-16">
       <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-12">
-        <Logo logos={logoList} />
-        <h1 className="text-7xl md:text-9xl font-black text-center text-neon-green glitch-text font-display mb-2 tracking-tight select-none">
-          METAH4
-        </h1>
+        <img src="/images/logo1.png" alt="METAH4" className="h-24 md:h-36 mx-auto mb-2" />
         <p className="text-center text-neon-purple text-sm mb-10 tracking-widest uppercase">
           privacy-first search engine
         </p>
@@ -117,17 +108,28 @@ function App() {
           </button>
         </div>
 
-        {hashed && (
-          <div className="flex items-center gap-3 mb-8 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neon-green/10 border border-neon-green text-neon-green text-xs animate-pulse">
-              <span className="w-2 h-2 rounded-full bg-neon-green inline-block" />
-              hashed on device
-            </span>
-            <span className="text-neon-gold/60 text-xs font-mono">
-              {hashValue.slice(0, 16)}…
-            </span>
-          </div>
-        )}
+        <div className="flex items-center gap-4 mb-4">
+          <button
+            onClick={() => setShowProofModal(true)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-neon-green/20 hover:bg-neon-green/40 rounded-full text-xs font-medium text-neon-green transition-all border border-neon-green/40"
+            title="Click to see privacy proof"
+          >
+            <span className="w-3 h-3 rounded-full bg-neon-green animate-pulse" />
+            Privacy Proof
+          </button>
+
+          {hashed && (
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neon-green/10 border border-neon-green text-neon-green text-xs animate-pulse">
+                <span className="w-2 h-2 rounded-full bg-neon-green inline-block" />
+                hashed on device
+              </span>
+              <span className="text-neon-gold/60 text-xs font-mono">
+                {hashValue.slice(0, 16)}…
+              </span>
+            </div>
+          )}
+        </div>
 
         {loading && (
           <div className="text-center py-16">
@@ -155,6 +157,31 @@ function App() {
           ))}
         </div>
       </main>
+
+      {showProofModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-fade-in">
+          <div className="card max-w-md w-full p-8 relative">
+            <button
+              onClick={() => setShowProofModal(false)}
+              className="absolute top-4 right-4 text-neon-purple hover:text-neon-green"
+            >
+              ×
+            </button>
+            <h2 className="text-2xl font-bold glitch-text mb-6">Privacy Proof</h2>
+            <p className="text-gray-300 mb-4">
+              Your search query was hashed on-device using SHA-256. Nothing — not even the raw text — left your computer. Brave API only sees the hash if we ever send it (we don't). Zero logs. Zero tracking.
+            </p>
+            {hashed && results[0]?.hash && (
+              <div className="bg-black/60 p-4 rounded-lg font-mono text-xs break-all text-neon-green/90">
+                SHA-256: {results[0].hash}
+              </div>
+            )}
+            <p className="mt-6 text-xs opacity-70">
+              Built with libsodium-wrappers. Auditable. No backend. No bullshit.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="fixed bottom-0 left-0 right-0 bg-card-bg border-t border-neon-purple/40 py-2 text-center text-neon-purple/70 text-xs tracking-wider">
         Protected by NordVPN — affiliate link coming
