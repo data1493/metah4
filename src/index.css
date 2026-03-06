@@ -38,23 +38,6 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes basketballBounce {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  25% { transform: translateY(-20px) rotate(90deg); }
-  50% { transform: translateY(-10px) rotate(180deg); }
-  75% { transform: translateY(-30px) rotate(270deg); }
-}
-
-@keyframes lakersFloat {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-15px) scale(1.05); }
-}
-
-@keyframes particleTwinkle {
-  0%, 100% { opacity: 0.3; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.2); }
-}
-
 body {
   background-color: #0a0a0a;
   color: #f0f0f0;
