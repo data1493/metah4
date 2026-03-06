@@ -263,7 +263,7 @@ export function DevColorPicker() {
                   <button onClick={themeBack} disabled={themeIdx <= 0} className="px-2 py-1 rounded text-xs font-bold disabled:opacity-30" style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#FDB927' }}>← Back</button>
                   <button onClick={themeForward} disabled={themeIdx >= themeHistory.length - 1} className="px-2 py-1 rounded text-xs font-bold disabled:opacity-30" style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: '#FDB927' }}>Fwd →</button>
                 </div>
-                <button onClick={handleSave} disabled={saving} className="px-3 py-1 rounded text-xs font-bold disabled:opacity-50" style={{ backgroundColor: '#22c55e', color: '#000' }}>{saving ? '...' : 'Save'}</button>
+                <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded text-xs font-black disabled:opacity-50 tracking-wide" style={{ backgroundColor: '#22c55e', color: '#000', boxShadow: '0 0 8px rgba(34,197,94,0.6)' }}>{saving ? 'Saving...' : '💾 SAVE'}</button>
               </div>
               {saveMsg && <div className="px-4 pb-3"><div className="text-[10px] font-mono rounded p-2" style={{ backgroundColor: 'rgba(34,197,94,0.15)', color: '#22c55e' }}>{saveMsg}</div></div>}
             </>
