@@ -5,6 +5,7 @@ import type { LogEntry } from '../types'
 interface ActivityLogsModalContentProps {
   logs: LogEntry[]
   onNukeLogs: () => void
+  onCloseModal: () => void
 }
 
 // Deterministic golden-angle particle spread (no random — stable across renders)
@@ -26,7 +27,7 @@ const SMOKE = Array.from({ length: 10 }, (_, i) => ({
 
 function NukeExplosion({ onComplete }: { onComplete: () => void }) {
   useEffect(() => {
-    const t = setTimeout(onComplete, 3200)
+    const t = setTimeout(onComplete, 4700)
     return () => clearTimeout(t)
   }, [onComplete])
 
@@ -88,10 +89,13 @@ function NukeExplosion({ onComplete }: { onComplete: () => void }) {
   )
 }
 
-const ActivityLogsModalContent = memo(function ActivityLogsModalContent({ logs, onNukeLogs }: ActivityLogsModalContentProps) {
+const ActivityLogsModalContent = memo(function ActivityLogsModalContent({ logs, onNukeLogs, onCloseModal }: ActivityLogsModalContentProps) {
   const [isExploding, setIsExploding] = useState(false)
 
-  const handleNuke = () => setIsExploding(true)
+  const handleNuke = () => {
+    onCloseModal()       // dismiss modal immediately
+    setIsExploding(true)
+  }
 
   return (
     <>

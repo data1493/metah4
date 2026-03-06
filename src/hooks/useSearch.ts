@@ -24,6 +24,7 @@ interface UseSearchReturn {
   logs: LogEntry[]
   search: () => Promise<void>
   clearLogs: () => void
+  resetSearch: () => void
 }
 
 export function useSearch(): UseSearchReturn {
@@ -88,5 +89,14 @@ export function useSearch(): UseSearchReturn {
 
   const clearLogs = useCallback(() => setLogs([]), [])
 
-  return { query, setQuery, results, loading, error, hashed, hashValue, apiKeyError, logs, search, clearLogs }
+  const resetSearch = useCallback(() => {
+    setQuery('')
+    setResults([])
+    setError('')
+    setHashed(false)
+    setHashValue('')
+    setLogs([])
+  }, [])
+
+  return { query, setQuery, results, loading, error, hashed, hashValue, apiKeyError, logs, search, clearLogs, resetSearch }
 }

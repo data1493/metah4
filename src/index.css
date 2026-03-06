@@ -330,7 +330,7 @@ body {
   top: 50%;
   text-align: center;
   white-space: nowrap;
-  animation: nukeTextAnim 3.2s ease-out forwards;
+  animation: nukeTextAnim 4.7s ease-out forwards;
   pointer-events: none;
 }
 
@@ -359,17 +359,21 @@ body {
 }
 
 @keyframes nukeTextAnim {
-  0%, 42% {
+  0%, 30% {
     opacity: 0;
     transform: translate(-50%, -50%) scale(2.2);
     filter: blur(24px);
   }
-  56% {
+  42% {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
     filter: blur(0);
   }
-  80% { opacity: 1; }
+  72% { opacity: 1; }
+  88% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(0.97);
+  }
   100% {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.88);

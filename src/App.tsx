@@ -14,7 +14,7 @@ const DevColorPicker = React.lazy(() => import('./components/DevTools').then(m =
 const DevFontWorkshop = React.lazy(() => import('./components/DevTools').then(m => ({ default: m.DevFontWorkshop })))
 
 function App() {
-  const { query, setQuery, results, loading, error, hashed, hashValue, apiKeyError, logs, search, clearLogs } = useSearch()
+  const { query, setQuery, results, loading, error, hashed, hashValue, apiKeyError, logs, search, resetSearch } = useSearch()
   const [showProofModal, setShowProofModal] = useState(false)
   const [showLogsModal, setShowLogsModal] = useState(false)
 
@@ -25,9 +25,9 @@ function App() {
   const handleCloseProof = useCallback(() => setShowProofModal(false), [])
   const handleCloseLogs = useCallback(() => setShowLogsModal(false), [])
   const handleNukeLogs = useCallback(() => {
-    clearLogs()
+    resetSearch()
     setShowLogsModal(false)
-  }, [clearLogs])
+  }, [resetSearch])
 
   return (
     <div className="min-h-screen bg-deep-black flex flex-col pb-16 relative" style={{ overflowX: 'clip' }}>
@@ -62,7 +62,7 @@ function App() {
       </Modal>
 
       <Modal open={showLogsModal} onClose={handleCloseLogs} ariaLabel="Activity Logs">
-        <ActivityLogsModalContent logs={logs} onNukeLogs={handleNukeLogs} />
+        <ActivityLogsModalContent logs={logs} onNukeLogs={handleNukeLogs} onCloseModal={handleCloseLogs} />
       </Modal>
 
       <React.Suspense fallback={null}>
