@@ -26,7 +26,7 @@ const SMOKE = Array.from({ length: 10 }, (_, i) => ({
 
 function NukeExplosion({ onComplete }: { onComplete: () => void }) {
   useEffect(() => {
-    const t = setTimeout(onComplete, 4700)
+    const t = setTimeout(onComplete, 4500)
     return () => clearTimeout(t)
   }, [onComplete])
 

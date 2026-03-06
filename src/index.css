@@ -133,7 +133,7 @@ body {
   pointer-events: all;
 }
 
-/* Full-screen dark cover — hides the modal box and dims the background for the whole 4.7s */
+/* Full-screen dark cover — hides the modal box and dims the background for the whole sequence */
 .nuke-backdrop {
   position: absolute;
   inset: 0;
@@ -145,8 +145,7 @@ body {
   0%   { opacity: 0; }
   4%   { opacity: 0; }   /* let white flash hit first */
   12%  { opacity: 0.98; }
-  88%  { opacity: 0.98; }
-  100% { opacity: 0; }
+  100% { opacity: 0.98; } /* stays solid — removed by React unmounting, not CSS */
 }
 
 .nuke-shake-wrapper {
