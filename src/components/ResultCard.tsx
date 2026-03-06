@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import type { SearchResult } from '../types'
+import LocalBadge from './LocalBadge'
 
 interface Props {
   result: SearchResult
@@ -18,6 +19,11 @@ const ResultCard = memo(function ResultCard({ result, index }: Props) {
       className={`card animate-fade-in ${pulseBorder} p-6`}
       style={{ animationDelay: `${index * 80}ms` }}
     >
+      {/* Domain line with optional local badge */}
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-neon-gold/50 text-xs font-mono truncate">{result.domain}</span>
+        {result.isLocal && <LocalBadge />}
+      </div>
       <a
         href={result.url}
         target="_blank"
@@ -26,11 +32,6 @@ const ResultCard = memo(function ResultCard({ result, index }: Props) {
       >
         {result.title}
       </a>
-      <div className="text-neon-gold/80 text-sm mb-3 break-all">
-        <a href={result.url} target="_blank" rel="noopener noreferrer" className="hover:text-neon-gold transition-colors">
-          {result.url}
-        </a>
-      </div>
       <p className="text-gray-200 text-base leading-relaxed">{result.description}</p>
     </article>
   )

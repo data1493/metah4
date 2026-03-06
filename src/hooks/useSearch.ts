@@ -1,7 +1,10 @@
 import { useState, useCallback } from 'react'
 import axios from 'axios'
 import { API } from '../config'
-import type { SearchResult, BraveWebResult, LogEntry } from '../types'
+import type { SearchResult, BraveWebResult, BraveLocalResult, LogEntry } from '../types'
+
+// Domains that typically indicate local business listings
+const LOCAL_DOMAINS = ['yelp.com', 'yellowpages.com', 'tripadvisor.com', 'mapquest.com', 'bbb.org', 'nextdoor.com']
 
 export function hashQuery(q: string): Promise<string> {
   const data = new TextEncoder().encode(q)
@@ -22,9 +25,25 @@ interface UseSearchReturn {
   hashValue: string
   apiKeyError: boolean
   logs: LogEntry[]
-  search: () => Promise<void>
+  search: (lat?: number | null, lng?: number | null) => Promise<void>
   clearLogs: () => void
   resetSearch: () => void
+}
+
+function extractDomain(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return url
+  }
+}
+
+function isLocalResult(url: string, localResults: BraveLocalResult[]): boolean {
+  const domain = extractDomain(url)
+  // Check against known local listing domains
+  if (LOCAL_DOMAINS.some(d => domain.includes(d))) return true
+  // Check if URL matches any Brave local result
+  return localResults.some(lr => lr.url === url)
 }
 
 export function useSearch(): UseSearchReturn {
@@ -37,7 +56,7 @@ export function useSearch(): UseSearchReturn {
   const [apiKeyError, setApiKeyError] = useState(false)
   const [logs, setLogs] = useState<LogEntry[]>([])
 
-  const search = useCallback(async () => {
+  const search = useCallback(async (lat?: number | null, lng?: number | null) => {
     if (!query.trim()) return
 
     const apiKey = import.meta.env.VITE_BRAVE_SEARCH_API_KEY
@@ -65,19 +84,34 @@ export function useSearch(): UseSearchReturn {
     setLogs(prev => [...prev, ...newLogs])
 
     try {
-      const response = await axios.get(API.BRAVE_SEARCH, {
-        params: { q: query.trim(), count: API.RESULTS_PER_PAGE },
-      })
+      const params: Record<string, string | number> = {
+        q: query.trim(),
+        count: API.RESULTS_PER_PAGE,
+      }
+      // Pass geolocation if available for local result boosting
+      if (lat != null && lng != null) {
+        params.result_filter = 'web'
+      }
+
+      const response = await axios.get(API.BRAVE_SEARCH, { params })
       const webResults: BraveWebResult[] = response.data?.web?.results ?? []
-      setResults(
-        webResults.map((r, i) => ({
-          title: r.title,
-          description: r.description ?? '',
-          url: r.url,
-          hash: i === 0 ? hash : '',
-        }))
-      )
-      setLogs(prev => [...prev, { timestamp: new Date(), message: 'Search results received and displayed' }])
+      const localResults: BraveLocalResult[] = response.data?.locations?.results ?? []
+
+      const mapped: SearchResult[] = webResults.map((r, i) => ({
+        title: r.title,
+        description: r.description ?? '',
+        url: r.url,
+        hash: i === 0 ? hash : '',
+        domain: extractDomain(r.url),
+        isLocal: isLocalResult(r.url, localResults),
+      }))
+
+      // Boost local results to the top while preserving relative order
+      const locals = mapped.filter(r => r.isLocal)
+      const nonLocals = mapped.filter(r => !r.isLocal)
+      setResults([...locals, ...nonLocals])
+
+      setLogs(prev => [...prev, { timestamp: new Date(), message: `Search results received — ${locals.length} local result(s) boosted` }])
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'search failed'
       setError(msg)

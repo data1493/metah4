@@ -3,12 +3,22 @@ export interface SearchResult {
   description: string
   url: string
   hash: string
+  domain: string
+  isLocal: boolean
 }
 
 export interface BraveWebResult {
   title: string
   description?: string
   url: string
+}
+
+export interface BraveLocalResult {
+  title: string
+  description?: string
+  url: string
+  address?: string
+  phone?: string
 }
 
 export interface LogEntry {

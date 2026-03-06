@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import { useSearch } from './hooks/useSearch'
 import { useBodyScrollLock } from './hooks/useBodyScrollLock'
+import { useGeolocation } from './hooks/useGeolocation'
 import type { SearchTab } from './types'
 import HomePage from './components/HomePage'
 import Header from './components/Header'
@@ -19,6 +20,7 @@ type ViewMode = 'home' | 'results'
 
 function App() {
   const { query, setQuery, results, loading, error, hashed, hashValue, apiKeyError, logs, search, resetSearch } = useSearch()
+  const { lat, lng } = useGeolocation()
   const [viewMode, setViewMode] = useState<ViewMode>('home')
   const [activeTab, setActiveTab] = useState<SearchTab>('all')
   const [showProofModal, setShowProofModal] = useState(false)
@@ -27,9 +29,9 @@ function App() {
   useBodyScrollLock(showProofModal || showLogsModal)
 
   const handleSearch = useCallback(async () => {
-    await search()
+    await search(lat, lng)
     setViewMode('results')
-  }, [search])
+  }, [search, lat, lng])
 
   const handleGoHome = useCallback(() => {
     resetSearch()

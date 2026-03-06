@@ -3,8 +3,8 @@ import { render, screen } from '@testing-library/react'
 import ResultsList from '../components/ResultsList'
 
 const mockResults = [
-  { title: 'Result 1', description: 'Desc 1', url: 'https://one.com', hash: 'h1' },
-  { title: 'Result 2', description: 'Desc 2', url: 'https://two.com', hash: '' },
+  { title: 'Result 1', description: 'Desc 1', url: 'https://one.com', hash: 'h1', domain: 'one.com', isLocal: false },
+  { title: 'Result 2', description: 'Desc 2', url: 'https://two.com', hash: '', domain: 'two.com', isLocal: false },
 ]
 
 describe('ResultsList', () => {

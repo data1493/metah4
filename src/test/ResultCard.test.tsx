@@ -7,14 +7,16 @@ const mockResult = {
   description: 'A description of the test result.',
   url: 'https://example.com/test',
   hash: 'abc123',
+  domain: 'example.com',
+  isLocal: false,
 }
 
 describe('ResultCard', () => {
-  it('renders the result title, URL, and description', () => {
+  it('renders the result title, domain, and description', () => {
     render(<ResultCard result={mockResult} index={0} />)
     expect(screen.getByText('Test Result Title')).toBeInTheDocument()
     expect(screen.getByText('A description of the test result.')).toBeInTheDocument()
-    expect(screen.getByText('https://example.com/test')).toBeInTheDocument()
+    expect(screen.getByText('example.com')).toBeInTheDocument()
   })
 
   it('renders title as a link with correct href', () => {
@@ -36,5 +38,15 @@ describe('ResultCard', () => {
 
     const { container: c1 } = render(<ResultCard result={mockResult} index={1} />)
     expect(c1.querySelector('.pulse-border-purple')).toBeInTheDocument()
+  })
+
+  it('shows LocalBadge when result isLocal', () => {
+    render(<ResultCard result={{ ...mockResult, isLocal: true }} index={0} />)
+    expect(screen.getByText('Local')).toBeInTheDocument()
+  })
+
+  it('does not show LocalBadge when result is not local', () => {
+    render(<ResultCard result={mockResult} index={0} />)
+    expect(screen.queryByText('Local')).not.toBeInTheDocument()
   })
 })
