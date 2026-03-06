@@ -41,7 +41,7 @@ const ResultsList = memo(function ResultsList({ results, loading, error, apiKeyE
 
   return (
     <>
-      <div className="space-y-6 relative" style={{ zIndex: 1 }} role="list" aria-label="Search results">
+      <div className="space-y-6 relative" role="list" aria-label="Search results">
         {results.map((r, i) => (
           <ResultCard key={`${r.url}-${i}`} result={r} index={i} />
         ))}
