@@ -20,12 +20,14 @@ function saveColorsPlugin() {
             const colors: Record<string, string> = JSON.parse(body)
             const root = process.cwd()
 
-            // Update src/index.css — :root block
+            // Update src/index.css — :root block AND @theme block
             const cssPath = path.join(root, 'src', 'index.css')
             let css = fs.readFileSync(cssPath, 'utf-8')
             for (const [k, v] of Object.entries(colors)) {
-              // replace e.g.  --neon-gold: #FDB927;
+              // :root vars e.g.  --neon-gold: #FDB927;
               css = css.replace(new RegExp(`(--${k}:\\s*)([^;]+)(;)`, 'g'), `$1${v}$3`)
+              // @theme vars e.g.  --color-neon-gold: #ffd700;
+              css = css.replace(new RegExp(`(--color-${k}:\\s*)([^;]+)(;)`, 'g'), `$1${v}$3`)
             }
             fs.writeFileSync(cssPath, css, 'utf-8')
 
