@@ -32,6 +32,8 @@ function NukeExplosion({ onComplete }: { onComplete: () => void }) {
 
   return createPortal(
     <div className="nuke-overlay">
+      {/* Persistent dark cover hiding modal and dimming background */}
+      <div className="nuke-backdrop" />
       <div className="nuke-shake-wrapper">
         {/* Initial blinding flash */}
         <div className="nuke-flash" />

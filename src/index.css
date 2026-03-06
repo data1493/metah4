@@ -133,6 +133,22 @@ body {
   pointer-events: all;
 }
 
+/* Full-screen dark cover — hides the modal box and dims the background for the whole 4.7s */
+.nuke-backdrop {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  animation: nukeBackdrop 4.7s ease-out forwards;
+}
+
+@keyframes nukeBackdrop {
+  0%   { opacity: 0; }
+  4%   { opacity: 0; }   /* let white flash hit first */
+  12%  { opacity: 0.98; }
+  88%  { opacity: 0.98; }
+  100% { opacity: 0; }
+}
+
 .nuke-shake-wrapper {
   position: relative;
   width: 100%;
