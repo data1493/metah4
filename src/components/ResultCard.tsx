@@ -1,23 +1,20 @@
-interface SearchResult {
-  title: string
-  description: string
-  url: string
-  hash: string
-}
+import { memo } from 'react'
+import type { SearchResult } from '../types'
 
 interface Props {
   result: SearchResult
   index: number
 }
 
-function ResultCard({ result, index }: Props) {
+const ResultCard = memo(function ResultCard({ result, index }: Props) {
   const isEven = index % 2 === 0
   const titleColor = isEven ? 'text-neon-purple' : 'text-neon-gold'
   const titleHoverColor = isEven ? 'hover:text-neon-gold' : 'hover:text-neon-purple'
   const pulseBorder = isEven ? 'pulse-border-gold' : 'pulse-border-purple'
 
   return (
-    <div
+    <article
+      role="listitem"
       className={`card animate-fade-in ${pulseBorder} p-6`}
       style={{ animationDelay: `${index * 80}ms` }}
     >
@@ -35,8 +32,8 @@ function ResultCard({ result, index }: Props) {
         </a>
       </div>
       <p className="text-gray-200 text-base leading-relaxed">{result.description}</p>
-    </div>
+    </article>
   )
-}
+})
 
 export default ResultCard

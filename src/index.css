@@ -1,6 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 @import "tailwindcss";
 
+:root {
+  --neon-green: #FDB927;
+  --neon-purple: #542583;
+  --neon-gold: #FDB927;
+  --deep-black: #1a0a1a;
+  --card-bg: #111111;
+  --lakers-purple: #542583;
+  --lakers-gold: #FDB927;
+}
+
 @theme {
   --color-neon-green: #39ff14;
   --color-neon-purple: #d400ff;
@@ -26,6 +36,23 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes basketballBounce {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-20px) rotate(90deg); }
+  50% { transform: translateY(-10px) rotate(180deg); }
+  75% { transform: translateY(-30px) rotate(270deg); }
+}
+
+@keyframes lakersFloat {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-15px) scale(1.05); }
+}
+
+@keyframes particleTwinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.2); }
 }
 
 body {
@@ -61,6 +88,7 @@ body {
 
 .pulse-border-gold {
   position: relative;
+  isolation: isolate;
   background: #111111;
   border: 1px solid rgba(255, 215, 0, 0.4) !important;
 }
@@ -86,6 +114,7 @@ body {
 
 .pulse-border-purple {
   position: relative;
+  isolation: isolate;
   background: #111111;
   border: 1px solid rgba(212, 0, 255, 0.4) !important;
 }
