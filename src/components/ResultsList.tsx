@@ -14,7 +14,7 @@ const ResultsList = memo(function ResultsList({ results, loading, error, apiKeyE
   if (loading) {
     return (
       <div className="text-center py-16" role="status" aria-live="polite">
-        <span className="text-neon-gold text-3xl glitch-text tracking-widest">
+        <span className="text-neon-gold text-2xl font-display tracking-widest record-scratch">
           SEARCHING...
         </span>
       </div>

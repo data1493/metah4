@@ -20,7 +20,7 @@ const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabl
         alt="METAH4"
         className="h-32 md:h-48 mb-4 drop-shadow-lg"
       />
-      <p className="text-neon-purple text-sm mb-10 tracking-widest uppercase text-center">
+      <p className="font-graffiti text-neon-purple text-sm mb-10 tracking-widest uppercase text-center">
         privacy-first search engine
       </p>
 

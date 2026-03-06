@@ -50,7 +50,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-deep-black flex flex-col relative" style={{ overflowX: 'clip' }}>
-      <BackgroundEffects />
+      <BackgroundEffects variant={viewMode} />
 
       {viewMode === 'home' ? (
         <main className="flex-1 relative z-10">
@@ -113,9 +113,13 @@ function App() {
         <DevFontWorkshop />
       </React.Suspense>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-card-bg border-t border-neon-purple/40 py-2 text-center text-neon-purple/70 text-xs tracking-wider z-20">
-        Protected by NordVPN — affiliate link coming
-      </div>
+      <footer className="fixed bottom-0 left-0 right-0 bg-card-bg/90 backdrop-blur-sm border-t border-neon-purple/20 py-2 z-20">
+        <div className="flex items-center justify-center gap-3 text-xs tracking-wider">
+          <span className="text-neon-purple/40">Powered by Brave Search</span>
+          <span className="text-neon-purple/20">·</span>
+          <span className="text-neon-gold/40">Protected by NordVPN</span>
+        </div>
+      </footer>
     </div>
   )
 }

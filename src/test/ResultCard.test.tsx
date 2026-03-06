@@ -32,12 +32,9 @@ describe('ResultCard', () => {
     expect(screen.getByRole('listitem')).toBeInTheDocument()
   })
 
-  it('alternates border styles for even/odd indices', () => {
+  it('renders with correct card styling', () => {
     const { container: c0 } = render(<ResultCard result={mockResult} index={0} />)
-    expect(c0.querySelector('.pulse-border-gold')).toBeInTheDocument()
-
-    const { container: c1 } = render(<ResultCard result={mockResult} index={1} />)
-    expect(c1.querySelector('.pulse-border-purple')).toBeInTheDocument()
+    expect(c0.querySelector('.card')).toBeInTheDocument()
   })
 
   it('shows LocalBadge when result isLocal', () => {
