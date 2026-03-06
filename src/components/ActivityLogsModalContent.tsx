@@ -5,7 +5,6 @@ import type { LogEntry } from '../types'
 interface ActivityLogsModalContentProps {
   logs: LogEntry[]
   onNukeLogs: () => void
-  onCloseModal: () => void
 }
 
 // Deterministic golden-angle particle spread (no random — stable across renders)
@@ -89,16 +88,21 @@ function NukeExplosion({ onComplete }: { onComplete: () => void }) {
   )
 }
 
-const ActivityLogsModalContent = memo(function ActivityLogsModalContent({ logs, onNukeLogs, onCloseModal }: ActivityLogsModalContentProps) {
+const ActivityLogsModalContent = memo(function ActivityLogsModalContent({ logs, onNukeLogs }: ActivityLogsModalContentProps) {
   const [isExploding, setIsExploding] = useState(false)
 
   const handleNuke = () => {
-    onCloseModal()       // dismiss modal immediately
     setIsExploding(true)
   }
 
   return (
-    <>
+    <div
+      style={{
+        transition: 'opacity 0.5s ease-out',
+        opacity: isExploding ? 0 : 1,
+        pointerEvents: isExploding ? 'none' : undefined,
+      }}
+    >
       <h2 className="text-2xl font-bold glitch-text mb-6">Activity Logs</h2>
       <p className="text-gray-300 mb-4">
         Your digital paper trail - proving privacy in plain sight. Every step logged locally, nothing sent externally without your knowledge.
@@ -129,7 +133,7 @@ const ActivityLogsModalContent = memo(function ActivityLogsModalContent({ logs, 
       </div>
 
       {isExploding && <NukeExplosion onComplete={onNukeLogs} />}
-    </>
+    </div>
   )
 })
 

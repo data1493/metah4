@@ -62,7 +62,7 @@ function App() {
       </Modal>
 
       <Modal open={showLogsModal} onClose={handleCloseLogs} ariaLabel="Activity Logs">
-        <ActivityLogsModalContent logs={logs} onNukeLogs={handleNukeLogs} onCloseModal={handleCloseLogs} />
+        <ActivityLogsModalContent logs={logs} onNukeLogs={handleNukeLogs} />
       </Modal>
 
       <React.Suspense fallback={null}>
