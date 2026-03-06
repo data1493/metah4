@@ -1,8 +1,10 @@
 import React, { useState, useCallback } from 'react'
 import { useSearch } from './hooks/useSearch'
 import { useBodyScrollLock } from './hooks/useBodyScrollLock'
+import type { SearchTab } from './types'
 import HomePage from './components/HomePage'
 import Header from './components/Header'
+import SearchTabs from './components/SearchTabs'
 import StatusBar from './components/StatusBar'
 import ResultsList from './components/ResultsList'
 import Modal from './components/Modal'
@@ -18,6 +20,7 @@ type ViewMode = 'home' | 'results'
 function App() {
   const { query, setQuery, results, loading, error, hashed, hashValue, apiKeyError, logs, search, resetSearch } = useSearch()
   const [viewMode, setViewMode] = useState<ViewMode>('home')
+  const [activeTab, setActiveTab] = useState<SearchTab>('all')
   const [showProofModal, setShowProofModal] = useState(false)
   const [showLogsModal, setShowLogsModal] = useState(false)
 
@@ -31,6 +34,7 @@ function App() {
   const handleGoHome = useCallback(() => {
     resetSearch()
     setViewMode('home')
+    setActiveTab('all')
   }, [resetSearch])
 
   const handleShowProof = useCallback(() => setShowProofModal(true), [])
@@ -66,9 +70,17 @@ function App() {
             disabled={!query.trim()}
             onLogoClick={handleGoHome}
           />
+          <SearchTabs activeTab={activeTab} onTabChange={setActiveTab} />
           <main className="flex-1 max-w-3xl mx-auto w-full px-4 pt-4 relative z-10 pb-16">
             <StatusBar hashed={hashed} hashValue={hashValue} onShowProof={handleShowProof} onShowLogs={handleShowLogs} />
-            <ResultsList results={results} loading={loading} error={error} apiKeyError={apiKeyError} hashed={hashed} />
+            {activeTab === 'all' ? (
+              <ResultsList results={results} loading={loading} error={error} apiKeyError={apiKeyError} hashed={hashed} />
+            ) : (
+              <div className="text-center py-16 text-neon-purple/50 text-sm tracking-wide">
+                <p className="text-lg mb-2">Coming soon</p>
+                <p>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} search is under development</p>
+              </div>
+            )}
           </main>
         </>
       )}

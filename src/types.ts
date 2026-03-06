@@ -15,3 +15,5 @@ export interface LogEntry {
   timestamp: Date
   message: string
 }
+
+export type SearchTab = 'all' | 'images' | 'videos' | 'news'

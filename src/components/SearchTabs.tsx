@@ -1,0 +1,49 @@
+import { memo } from 'react'
+import type { SearchTab } from '../types'
+
+interface SearchTabsProps {
+  activeTab: SearchTab
+  onTabChange: (tab: SearchTab) => void
+}
+
+const TABS: { id: SearchTab; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'images', label: 'Images' },
+  { id: 'videos', label: 'Videos' },
+  { id: 'news', label: 'News' },
+]
+
+const SearchTabs = memo(function SearchTabs({ activeTab, onTabChange }: SearchTabsProps) {
+  return (
+    <nav aria-label="Search categories" className="border-b border-neon-purple/15">
+      <div className="max-w-5xl mx-auto px-4">
+        <ul className="flex gap-6" role="tablist">
+          {TABS.map(({ id, label }) => {
+            const isActive = activeTab === id
+            return (
+              <li key={id} role="presentation">
+                <button
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => onTabChange(id)}
+                  className={`relative py-3 text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'text-neon-purple'
+                      : 'text-neon-gold/50 hover:text-neon-gold/80'
+                  }`}
+                >
+                  {label}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-neon-purple rounded-full" />
+                  )}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    </nav>
+  )
+})
+
+export default SearchTabs
