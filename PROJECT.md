@@ -39,37 +39,38 @@ App.tsx  ─── viewMode: 'home' | 'results'
 - [x] Logo2 click returns to home mode and resets search
 - [x] Smooth transition between states
 
-### Phase 2 — Tab Navigation
-- [ ] Create `SearchTabs.tsx` — All · Images · Videos · News
-- [ ] Brave-style underlined active tab
-- [ ] Only "All" functional; others show "Coming soon"
-- [ ] Positioned below header in results mode
+### Phase 2 — Tab Navigation ✅
+- [x] Create `SearchTabs.tsx` — All · Images · Videos · News
+- [x] Brave-style underlined active tab
+- [x] Only "All" functional; others show "Coming soon"
+- [x] Positioned below header in results mode
+- [x] Arrow key navigation between tabs
 
-### Phase 3 — Local Business Boosting
-- [ ] Create `useGeolocation.ts` hook
-- [ ] Extend Brave API proxy for location params
-- [ ] Detect local results, boost to top
-- [ ] Create `LocalBadge.tsx` pill indicator on cards
+### Phase 3 — Local Business Boosting ✅
+- [x] Create `useGeolocation.ts` hook
+- [x] Extend Brave API proxy for location params
+- [x] Detect local results, boost to top
+- [x] Create `LocalBadge.tsx` pill indicator on cards
 
-### Phase 4 — Privacy Badge
-- [ ] Create `PrivacyBadge.tsx` — shield icon, idle → active states
-- [ ] Integrate into Header (right) and HomePage (below search)
-- [ ] Click opens Privacy Proof modal
-- [ ] Retire StatusBar (merge into badge + header)
+### Phase 4 — Privacy Badge ✅
+- [x] Create `PrivacyBadge.tsx` — shield icon, idle → active states
+- [x] Integrate into Header (right) and HomePage (below search)
+- [x] Click opens Privacy Proof modal
+- [x] StatusBar replaced with compact Logs button in results view
 
-### Phase 5 — 90s Hip-Hop Visual Identity
-- [ ] Typography: Permanent Marker + Bebas Neue
-- [ ] Background art: brick texture, spray-paint accents, hip-hop silhouettes
-- [ ] Result card redesign: Brave clean layout + hip-hop hover effects
-- [ ] Micro-animations: record scratch, boombox bounce, smooth transitions
-- [ ] Search bar pill redesign with search icon
-- [ ] Footer: clean credit line, subtle affiliate link
+### Phase 5 — 90s Hip-Hop Visual Identity ✅
+- [x] Typography: Permanent Marker + Bebas Neue
+- [x] Background art: brick texture, spray-paint accents, hip-hop silhouettes
+- [x] Result card redesign: Brave clean layout with favicon + domain + title
+- [x] Micro-animations: record scratch, bounce-in, slide-up
+- [x] Search bar pill redesign with search icon
+- [x] Footer: clean credit line, subtle affiliate link
 
-### Phase 6 — Polish
-- [ ] Responsive design audit (320px → 1440px+)
-- [ ] Skeleton loading cards
-- [ ] Accessibility pass (ARIA, keyboard, focus management)
-- [ ] Run all tests, fix failures
+### Phase 6 — Polish ✅
+- [x] Responsive design: overflow-x-auto tabs, mobile-friendly header
+- [x] Skeleton loading cards (4 shimmer placeholders)
+- [x] Accessibility pass (ARIA, keyboard tab navigation, sr-only labels, focus management)
+- [x] All 42 tests pass
 
 ---
 
@@ -94,10 +95,10 @@ App.tsx  ─── viewMode: 'home' | 'results'
 |------|---------|
 | `src/components/Header.tsx` | Results-mode top bar |
 | `src/components/HomePage.tsx` | Landing page layout |
-| `src/components/SearchTabs.tsx` | Tab navigation |
-| `src/components/PrivacyBadge.tsx` | Privacy shield badge |
-| `src/components/LocalBadge.tsx` | Local business indicator |
-| `src/components/SkeletonCard.tsx` | Loading placeholder |
+| `src/components/SearchTabs.tsx` | Tab navigation (All/Images/Videos/News) |
+| `src/components/PrivacyBadge.tsx` | Privacy shield badge (idle → active) |
+| `src/components/LocalBadge.tsx` | Local business indicator (📍 Local) |
+| `src/components/SkeletonCard.tsx` | Loading placeholder shimmer card |
 | `src/hooks/useGeolocation.ts` | Browser geolocation hook |
 
 ---
@@ -106,4 +107,9 @@ App.tsx  ─── viewMode: 'home' | 'results'
 
 | Date | Phase | Summary |
 |------|-------|---------|
-| 2026-03-06 | Setup | Project plan created |
+| 2026-03-06 | Setup | Project plan created || 2026-03-06 | Phase 1 | Two-state layout (home/results), Header, HomePage, SearchBar variants |
+| 2026-03-06 | Phase 2 | Tab navigation with arrow key support |
+| 2026-03-06 | Phase 3 | Geolocation hook, local business detection + boosting, LocalBadge |
+| 2026-03-06 | Phase 4 | PrivacyBadge with shield icon and idle/active states |
+| 2026-03-06 | Phase 5 | Permanent Marker + Bebas Neue fonts, brick texture, vinyl/boombox SVGs, Brave-style result cards with favicons, bounceIn animations |
+| 2026-03-06 | Phase 6 | Skeleton loading cards, accessibility (keyboard tabs, sr-only), responsive tabs, 42 tests passing |

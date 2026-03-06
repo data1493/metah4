@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import type { SearchResult } from '../types'
 import ResultCard from './ResultCard'
+import SkeletonCard from './SkeletonCard'
 
 interface ResultsListProps {
   results: SearchResult[]
@@ -13,10 +14,11 @@ interface ResultsListProps {
 const ResultsList = memo(function ResultsList({ results, loading, error, apiKeyError, hashed }: ResultsListProps) {
   if (loading) {
     return (
-      <div className="text-center py-16" role="status" aria-live="polite">
-        <span className="text-neon-gold text-2xl font-display tracking-widest record-scratch">
-          SEARCHING...
-        </span>
+      <div className="space-y-4" role="status" aria-live="polite" aria-label="Loading search results">
+        {[0, 1, 2, 3].map(i => (
+          <SkeletonCard key={i} index={i} />
+        ))}
+        <span className="sr-only">Loading search results...</span>
       </div>
     )
   }

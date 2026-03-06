@@ -36,4 +36,15 @@ describe('SearchTabs', () => {
     render(<SearchTabs {...defaultProps} />)
     expect(screen.getByRole('navigation', { name: /search categories/i })).toBeInTheDocument()
   })
+
+  it('supports arrow key navigation', async () => {
+    const user = userEvent.setup()
+    let selected = 'all'
+    render(<SearchTabs activeTab="all" onTabChange={(tab) => { selected = tab }} />)
+
+    // Focus the active tab and press ArrowRight
+    await user.click(screen.getByText('All'))
+    await user.keyboard('{ArrowRight}')
+    expect(selected).toBe('images')
+  })
 })

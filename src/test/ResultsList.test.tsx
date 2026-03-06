@@ -8,9 +8,10 @@ const mockResults = [
 ]
 
 describe('ResultsList', () => {
-  it('shows loading state', () => {
+  it('shows loading state with skeleton cards', () => {
     render(<ResultsList results={[]} loading={true} error="" apiKeyError={false} hashed={false} />)
-    expect(screen.getByText('SEARCHING...')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toBeInTheDocument()
+    expect(screen.getByText('Loading search results...')).toBeInTheDocument()
   })
 
   it('shows error state', () => {
