@@ -2,7 +2,7 @@ import { memo } from 'react'
 
 const LocalBadge = memo(function LocalBadge() {
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-neon-gold/15 border border-neon-gold/40 text-neon-gold text-xs font-medium">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium">
       <span aria-hidden="true">📍</span>
       Local
     </span>

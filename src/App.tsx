@@ -81,17 +81,17 @@ function App() {
             <div className="flex justify-end mb-3">
               <button
                 onClick={handleShowLogs}
-                className="flex items-center gap-2 px-3 py-1.5 bg-neon-gold/10 hover:bg-neon-gold/20 rounded-full text-xs font-medium text-neon-gold/70 transition-all border border-neon-gold/30"
+                className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-full text-xs font-medium text-zinc-400 transition-all border border-zinc-700"
                 title="View activity logs"
               >
-                <span className="w-2 h-2 rounded-full bg-neon-gold/60" aria-hidden="true" />
+                <span className="w-2 h-2 rounded-full bg-zinc-500" aria-hidden="true" />
                 Logs
               </button>
             </div>
             {activeTab === 'all' ? (
               <ResultsList results={results} loading={loading} error={error} apiKeyError={apiKeyError} hashed={hashed} />
             ) : (
-              <div className="text-center py-16 text-neon-purple/50 text-sm tracking-wide">
+              <div className="text-center py-16 text-zinc-500 text-sm">
                 <p className="text-lg mb-2">Coming soon</p>
                 <p>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} search is under development</p>
               </div>
@@ -113,11 +113,11 @@ function App() {
         <DevFontWorkshop />
       </React.Suspense>
 
-      <footer className="fixed bottom-0 left-0 right-0 bg-card-bg/90 backdrop-blur-sm border-t border-neon-purple/20 py-2 z-20">
-        <div className="flex items-center justify-center gap-3 text-xs tracking-wider">
-          <span className="text-neon-purple/40">Powered by Brave Search</span>
-          <span className="text-neon-purple/20">·</span>
-          <span className="text-neon-gold/40">Protected by NordVPN</span>
+      <footer className="fixed bottom-0 left-0 right-0 bg-deep-black/95 backdrop-blur-sm border-t border-zinc-800 py-2 z-20">
+        <div className="flex items-center justify-center gap-3 text-xs">
+          <span className="text-zinc-500">Powered by Brave Search</span>
+          <span className="text-zinc-700">·</span>
+          <span className="text-zinc-500">Protected by NordVPN</span>
         </div>
       </footer>
     </div>

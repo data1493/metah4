@@ -14,7 +14,7 @@ interface HeaderProps {
 
 const Header = memo(function Header({ query, onQueryChange, onSearch, disabled, onLogoClick, hashed, onShowProof }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 bg-deep-black/80 backdrop-blur-md border-b border-neon-purple/20">
+    <header className="sticky top-0 z-30 bg-deep-black/90 backdrop-blur-md border-b border-zinc-800">
       <div className="max-w-5xl mx-auto flex items-center gap-4 px-4 py-2">
         {/* Logo — clickable, returns to home */}
         <button

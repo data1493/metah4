@@ -15,8 +15,8 @@ const PrivacyBadge = memo(function PrivacyBadge({ hashed, onClick, variant = 'ho
       title="Click to see privacy proof"
       className={`inline-flex items-center gap-2 rounded-full font-medium transition-all border ${
         hashed
-          ? 'bg-neon-purple/25 border-neon-purple text-neon-purple shadow-[0_0_12px_rgba(212,0,255,0.3)]'
-          : 'bg-neon-purple/10 border-neon-purple/30 text-neon-purple/60 hover:border-neon-purple/60'
+          ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.15)]'
+          : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
       } ${isHeader ? 'px-3 py-1 text-xs' : 'px-4 py-2 text-sm'}`}
     >
       {/* Shield icon */}

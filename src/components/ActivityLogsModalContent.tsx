@@ -105,8 +105,8 @@ const ActivityLogsModalContent = memo(function ActivityLogsModalContent({ logs, 
         pointerEvents: isExploding ? 'none' : undefined,
       }}
     >
-      <h2 className="text-2xl font-bold glitch-text mb-6">Activity Logs</h2>
-      <p className="text-gray-300 mb-4">
+      <h2 className="text-2xl font-bold mb-6 text-zinc-100">Activity Logs</h2>
+      <p className="text-zinc-400 mb-4">
         Your digital paper trail - proving privacy in plain sight. Every step logged locally, nothing sent externally without your knowledge.
       </p>
       <div
@@ -116,7 +116,7 @@ const ActivityLogsModalContent = memo(function ActivityLogsModalContent({ logs, 
         aria-label="Activity log entries"
       >
         {logs.map((log, i) => (
-          <div key={i} className="text-neon-gold/90">
+          <div key={i} className="text-zinc-300">
             <span className="text-neon-purple/70">{log.timestamp.toLocaleTimeString()}</span> {log.message}
           </div>
         ))}

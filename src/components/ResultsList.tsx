@@ -33,7 +33,7 @@ const ResultsList = memo(function ResultsList({ results, loading, error, apiKeyE
 
   if (!apiKeyError && hashed && results.length === 0) {
     return (
-      <div className="text-center py-10 text-neon-purple/60 text-sm tracking-wide" role="status">
+      <div className="text-center py-10 text-zinc-500 text-sm tracking-wide" role="status">
         no results found
       </div>
     )
@@ -55,10 +55,10 @@ const ResultsList = memo(function ResultsList({ results, loading, error, apiKeyE
           <span
             key={page}
             aria-current={page === 1 ? 'page' : undefined}
-            className={`w-8 h-8 flex items-center justify-center rounded text-sm font-bold ${
+            className={`w-8 h-8 flex items-center justify-center rounded text-sm font-semibold ${
               page === 1
                 ? 'bg-neon-purple text-white'
-                : 'bg-card-bg border border-neon-gold/40 text-neon-gold/50'
+                : 'bg-card-bg border border-zinc-700 text-zinc-400'
             }`}
           >
             {page}

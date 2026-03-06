@@ -13,7 +13,7 @@ describe('SearchBar', () => {
 
   it('renders search input and button', () => {
     render(<SearchBar {...defaultProps} />)
-    expect(screen.getByPlaceholderText('search the underground...')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Search the web...')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /submit search/i })).toBeInTheDocument()
   })
 
@@ -33,7 +33,7 @@ describe('SearchBar', () => {
     const onQueryChange = (v: string) => { capturedValue = v }
     render(<SearchBar {...defaultProps} onQueryChange={onQueryChange} />)
 
-    await user.type(screen.getByPlaceholderText('search the underground...'), 'a')
+    await user.type(screen.getByPlaceholderText('Search the web...'), 'a')
     expect(capturedValue).toBe('a')
   })
 
@@ -43,7 +43,7 @@ describe('SearchBar', () => {
     const onSearch = () => { called = true }
     render(<SearchBar {...defaultProps} query="test" onSearch={onSearch} />)
 
-    await user.type(screen.getByPlaceholderText('search the underground...'), '{Enter}')
+    await user.type(screen.getByPlaceholderText('Search the web...'), '{Enter}')
     expect(called).toBe(true)
   })
 
@@ -54,7 +54,7 @@ describe('SearchBar', () => {
 
   it('renders compact variant for header', () => {
     render(<SearchBar {...defaultProps} variant="header" />)
-    expect(screen.getByPlaceholderText('search the underground...')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Search the web...')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /submit search/i })).toBeInTheDocument()
   })
 })

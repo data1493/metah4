@@ -22,7 +22,7 @@ const ResultCard = memo(function ResultCard({ result, index }: Props) {
           className="w-4 h-4 rounded-sm"
           loading="lazy"
         />
-        <span className="text-neon-gold/50 text-xs font-mono truncate">{result.domain}</span>
+        <span className="text-zinc-500 text-xs font-mono truncate">{result.domain}</span>
         {result.isLocal && <LocalBadge />}
       </div>
 
@@ -31,13 +31,13 @@ const ResultCard = memo(function ResultCard({ result, index }: Props) {
         href={result.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-neon-purple font-bold text-lg hover:text-neon-gold transition-colors duration-200 block mb-2 break-words leading-tight"
+        className="text-blue-400 font-semibold text-lg hover:text-blue-300 transition-colors duration-200 block mb-2 break-words leading-snug"
       >
         {result.title}
       </a>
 
       {/* Description */}
-      <p className="text-gray-300 text-sm leading-relaxed">{result.description}</p>
+      <p className="text-zinc-400 text-sm leading-relaxed">{result.description}</p>
     </article>
   )
 })

@@ -23,10 +23,10 @@ const SearchBar = memo(function SearchBar({ query, onQueryChange, onSearch, disa
   return (
     <search role="search" aria-label="Web search" className={isHeader ? 'flex gap-0' : 'flex gap-2 mb-4'}>
       <label htmlFor={isHeader ? 'header-search-input' : 'search-input'} className="sr-only">Search query</label>
-      <div className={`flex flex-1 items-center bg-card-bg border border-neon-gold/60 ${isHeader ? 'rounded-full px-3 py-1' : 'rounded-full px-4 py-3'} focus-within:border-neon-purple focus-within:ring-1 focus-within:ring-neon-purple transition-all`}>
+      <div className={`flex flex-1 items-center bg-card-bg border border-zinc-700 ${isHeader ? 'rounded-full px-3 py-1' : 'rounded-full px-4 py-2.5'} focus-within:border-neon-purple focus-within:ring-1 focus-within:ring-neon-purple/40 transition-all`}>
         {/* Search icon */}
         <svg
-          className={`text-neon-gold/50 flex-shrink-0 ${isHeader ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-3'}`}
+          className={`text-zinc-500 flex-shrink-0 ${isHeader ? 'w-4 h-4 mr-2' : 'w-5 h-5 mr-3'}`}
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
           aria-hidden="true"
         >
@@ -39,15 +39,15 @@ const SearchBar = memo(function SearchBar({ query, onQueryChange, onSearch, disa
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="search the underground..."
-          className={`flex-1 bg-transparent text-neon-gold outline-none font-mono placeholder:text-neon-gold/30 ${isHeader ? 'text-sm py-1' : 'text-base'}`}
+          placeholder="Search the web..."
+          className={`flex-1 bg-transparent text-zinc-100 outline-none placeholder:text-zinc-500 ${isHeader ? 'text-sm py-1' : 'text-base'}`}
           autoComplete="off"
         />
         <button
           onClick={onSearch}
           disabled={disabled}
           aria-label="Submit search"
-          className={`flex-shrink-0 bg-neon-purple text-white font-black rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neon-gold hover:text-deep-black transition-colors duration-200 ${isHeader ? 'text-xs px-4 py-1 ml-2' : 'text-sm px-6 py-2 ml-3'}`}
+          className={`flex-shrink-0 bg-neon-purple text-white font-semibold rounded-full disabled:opacity-30 disabled:cursor-not-allowed hover:bg-neon-purple/80 transition-colors duration-200 ${isHeader ? 'text-xs px-4 py-1 ml-2' : 'text-sm px-5 py-1.5 ml-3'}`}
         >
           GO
         </button>

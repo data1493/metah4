@@ -53,7 +53,7 @@ const Modal = memo(function Modal({ open, onClose, children, ariaLabel }: ModalP
         <button
           onClick={onClose}
           aria-label="Close dialog"
-          className="absolute top-4 right-4 text-neon-purple hover:text-neon-green text-2xl leading-none"
+          className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-200 text-2xl leading-none"
         >
           &times;
         </button>

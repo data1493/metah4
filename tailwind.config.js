@@ -13,7 +13,7 @@ export default {
       },
       fontFamily: {
         mono: ['JetBrains Mono', 'monospace'],
-        display: ['Rubik', 'sans-serif'],
+        display: ['Inter', 'sans-serif'],
       },
       animation: {
         glitch: 'glitch 0.3s infinite',
