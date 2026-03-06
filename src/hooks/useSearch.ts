@@ -23,6 +23,7 @@ interface UseSearchReturn {
   apiKeyError: boolean
   logs: LogEntry[]
   search: () => Promise<void>
+  clearLogs: () => void
 }
 
 export function useSearch(): UseSearchReturn {
@@ -85,5 +86,7 @@ export function useSearch(): UseSearchReturn {
     }
   }, [query])
 
-  return { query, setQuery, results, loading, error, hashed, hashValue, apiKeyError, logs, search }
+  const clearLogs = useCallback(() => setLogs([]), [])
+
+  return { query, setQuery, results, loading, error, hashed, hashValue, apiKeyError, logs, search, clearLogs }
 }
