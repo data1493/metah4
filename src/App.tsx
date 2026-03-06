@@ -18,7 +18,7 @@ const DevFontWorkshop = React.lazy(() => import('./components/DevTools').then(m 
 type ViewMode = 'home' | 'results'
 
 function App() {
-  const { query, setQuery, results, loading, error, hashed, apiKeyError, logs, search, resetSearch } = useSearch()
+  const { query, setQuery, results, loading, error, hashed, hashValue, apiKeyError, logs, search, resetSearch } = useSearch()
   const { lat, lng } = useGeolocation()
   const [viewMode, setViewMode] = useState<ViewMode>('home')
   const [activeTab, setActiveTab] = useState<SearchTab>('all')
@@ -61,6 +61,7 @@ function App() {
             disabled={!query.trim()}
             apiKeyError={apiKeyError}
             hashed={hashed}
+            hashValue={hashValue}
             onShowProof={handleShowProof}
           />
         </main>
@@ -73,6 +74,7 @@ function App() {
             disabled={!query.trim()}
             onLogoClick={handleGoHome}
             hashed={hashed}
+            hashValue={hashValue}
             onShowProof={handleShowProof}
           />
           <SearchTabs activeTab={activeTab} onTabChange={setActiveTab} />

@@ -9,10 +9,11 @@ interface HomePageProps {
   disabled: boolean
   apiKeyError: boolean
   hashed: boolean
+  hashValue: string
   onShowProof: () => void
 }
 
-const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabled, apiKeyError, hashed, onShowProof }: HomePageProps) {
+const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabled, apiKeyError, hashed, hashValue, onShowProof }: HomePageProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
       <img
@@ -41,7 +42,7 @@ const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabl
       </div>
 
       <div className="mt-6">
-        <PrivacyBadge hashed={hashed} onClick={onShowProof} variant="home" />
+        <PrivacyBadge hashed={hashed} hashValue={hashValue} onClick={onShowProof} variant="home" />
       </div>
     </div>
   )

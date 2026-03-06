@@ -9,10 +9,11 @@ interface HeaderProps {
   disabled: boolean
   onLogoClick: () => void
   hashed: boolean
+  hashValue: string
   onShowProof: () => void
 }
 
-const Header = memo(function Header({ query, onQueryChange, onSearch, disabled, onLogoClick, hashed, onShowProof }: HeaderProps) {
+const Header = memo(function Header({ query, onQueryChange, onSearch, disabled, onLogoClick, hashed, hashValue, onShowProof }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 bg-deep-black/90 backdrop-blur-md border-b border-zinc-800">
       <div className="max-w-5xl mx-auto flex items-center gap-4 px-4 py-2">
@@ -37,7 +38,7 @@ const Header = memo(function Header({ query, onQueryChange, onSearch, disabled, 
         </div>
 
         {/* Privacy badge */}
-        <PrivacyBadge hashed={hashed} onClick={onShowProof} variant="header" />
+        <PrivacyBadge hashed={hashed} hashValue={hashValue} onClick={onShowProof} variant="header" />
       </div>
     </header>
   )

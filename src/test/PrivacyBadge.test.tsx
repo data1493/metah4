@@ -11,7 +11,7 @@ describe('PrivacyBadge', () => {
 
   it('shows active state when hashed', () => {
     render(<PrivacyBadge hashed={true} onClick={() => {}} />)
-    expect(screen.getByText('Verified: Hashed on Device')).toBeInTheDocument()
+    expect(screen.getByText('Hashed on Device')).toBeInTheDocument()
   })
 
   it('calls onClick when clicked', async () => {
@@ -23,7 +23,7 @@ describe('PrivacyBadge', () => {
   })
 
   it('renders compact variant for header', () => {
-    render(<PrivacyBadge hashed={true} onClick={() => {}} variant="header" />)
-    expect(screen.getByText('Verified: Hashed on Device')).toBeInTheDocument()
+    render(<PrivacyBadge hashed={true} hashValue="abcdef1234567890" onClick={() => {}} variant="header" />)
+    expect(screen.getByText(/abcdef123456/)).toBeInTheDocument()
   })
 })
