@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import SearchBar from './SearchBar'
+import PrivacyBadge from './PrivacyBadge'
 
 interface HomePageProps {
   query: string
@@ -7,9 +8,11 @@ interface HomePageProps {
   onSearch: () => void
   disabled: boolean
   apiKeyError: boolean
+  hashed: boolean
+  onShowProof: () => void
 }
 
-const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabled, apiKeyError }: HomePageProps) {
+const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabled, apiKeyError, hashed, onShowProof }: HomePageProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
       <img
@@ -35,6 +38,10 @@ const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabl
           disabled={disabled}
           variant="home"
         />
+      </div>
+
+      <div className="mt-6">
+        <PrivacyBadge hashed={hashed} onClick={onShowProof} variant="home" />
       </div>
     </div>
   )

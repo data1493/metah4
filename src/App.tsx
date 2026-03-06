@@ -6,7 +6,6 @@ import type { SearchTab } from './types'
 import HomePage from './components/HomePage'
 import Header from './components/Header'
 import SearchTabs from './components/SearchTabs'
-import StatusBar from './components/StatusBar'
 import ResultsList from './components/ResultsList'
 import Modal from './components/Modal'
 import PrivacyProofModalContent from './components/PrivacyProofModalContent'
@@ -19,7 +18,7 @@ const DevFontWorkshop = React.lazy(() => import('./components/DevTools').then(m 
 type ViewMode = 'home' | 'results'
 
 function App() {
-  const { query, setQuery, results, loading, error, hashed, hashValue, apiKeyError, logs, search, resetSearch } = useSearch()
+  const { query, setQuery, results, loading, error, hashed, apiKeyError, logs, search, resetSearch } = useSearch()
   const { lat, lng } = useGeolocation()
   const [viewMode, setViewMode] = useState<ViewMode>('home')
   const [activeTab, setActiveTab] = useState<SearchTab>('all')
@@ -61,6 +60,8 @@ function App() {
             onSearch={handleSearch}
             disabled={!query.trim()}
             apiKeyError={apiKeyError}
+            hashed={hashed}
+            onShowProof={handleShowProof}
           />
         </main>
       ) : (
@@ -71,10 +72,22 @@ function App() {
             onSearch={handleSearch}
             disabled={!query.trim()}
             onLogoClick={handleGoHome}
+            hashed={hashed}
+            onShowProof={handleShowProof}
           />
           <SearchTabs activeTab={activeTab} onTabChange={setActiveTab} />
           <main className="flex-1 max-w-3xl mx-auto w-full px-4 pt-4 relative z-10 pb-16">
-            <StatusBar hashed={hashed} hashValue={hashValue} onShowProof={handleShowProof} onShowLogs={handleShowLogs} />
+            {/* Activity logs button */}
+            <div className="flex justify-end mb-3">
+              <button
+                onClick={handleShowLogs}
+                className="flex items-center gap-2 px-3 py-1.5 bg-neon-gold/10 hover:bg-neon-gold/20 rounded-full text-xs font-medium text-neon-gold/70 transition-all border border-neon-gold/30"
+                title="View activity logs"
+              >
+                <span className="w-2 h-2 rounded-full bg-neon-gold/60" aria-hidden="true" />
+                Logs
+              </button>
+            </div>
             {activeTab === 'all' ? (
               <ResultsList results={results} loading={loading} error={error} apiKeyError={apiKeyError} hashed={hashed} />
             ) : (

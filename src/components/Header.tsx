@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import SearchBar from './SearchBar'
+import PrivacyBadge from './PrivacyBadge'
 
 interface HeaderProps {
   query: string
@@ -7,9 +8,11 @@ interface HeaderProps {
   onSearch: () => void
   disabled: boolean
   onLogoClick: () => void
+  hashed: boolean
+  onShowProof: () => void
 }
 
-const Header = memo(function Header({ query, onQueryChange, onSearch, disabled, onLogoClick }: HeaderProps) {
+const Header = memo(function Header({ query, onQueryChange, onSearch, disabled, onLogoClick, hashed, onShowProof }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 bg-deep-black/80 backdrop-blur-md border-b border-neon-purple/20">
       <div className="max-w-5xl mx-auto flex items-center gap-4 px-4 py-2">
@@ -32,6 +35,9 @@ const Header = memo(function Header({ query, onQueryChange, onSearch, disabled, 
             variant="header"
           />
         </div>
+
+        {/* Privacy badge */}
+        <PrivacyBadge hashed={hashed} onClick={onShowProof} variant="header" />
       </div>
     </header>
   )
