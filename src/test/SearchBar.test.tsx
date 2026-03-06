@@ -51,4 +51,10 @@ describe('SearchBar', () => {
     render(<SearchBar {...defaultProps} />)
     expect(screen.getByRole('search')).toBeInTheDocument()
   })
+
+  it('renders compact variant for header', () => {
+    render(<SearchBar {...defaultProps} variant="header" />)
+    expect(screen.getByPlaceholderText('search the underground...')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /submit search/i })).toBeInTheDocument()
+  })
 })
