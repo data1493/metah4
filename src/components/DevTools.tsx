@@ -171,12 +171,26 @@ export function DevColorPicker() {
   const handleSave = async () => {
     setSaving(true); setSaveMsg('')
     try {
-      const output = `/* tailwind.config.js colors */\n${Object.entries(colors).map(([k, v]) => `'${k}': '${v}',`).join('\n')}\n\n/* index.css :root */\n${Object.entries(colors).map(([k, v]) => `--${k}: ${v};`).join('\n')}\n\n/* index.css @theme */\n${Object.entries(colors).map(([k, v]) => `--color-${k}: ${v};`).join('\n')}`
-      await navigator.clipboard.writeText(output)
-      setSaveMsg('Copied to clipboard!')
+      const res = await fetch('/api/save-colors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(colors),
+      })
+      if (res.ok) {
+        setSaveMsg('✅ Saved to source files!')
+      } else {
+        const err = await res.json().catch(() => ({}))
+        setSaveMsg(`❌ Error: ${err.error ?? res.statusText}`)
+      }
     } catch {
-      const output = Object.entries(colors).map(([k, v]) => `--color-${k}: ${v};`).join('\n')
-      setSaveMsg(`Copy manually:\n${output}`)
+      // Fallback: copy to clipboard if server not running
+      try {
+        const output = `/* index.css :root */\n${Object.entries(colors).map(([k, v]) => `--${k}: ${v};`).join('\n')}`
+        await navigator.clipboard.writeText(output)
+        setSaveMsg('📋 Copied to clipboard (dev server not running)')
+      } catch {
+        setSaveMsg('❌ Save failed — is dev server running?')
+      }
     } finally {
       setSaving(false)
       setTimeout(() => setSaveMsg(''), 5000)
