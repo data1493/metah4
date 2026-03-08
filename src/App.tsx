@@ -8,6 +8,7 @@ import Header from './components/Header'
 import SearchTabs from './components/SearchTabs'
 import ResultsList from './components/ResultsList'
 import Modal from './components/Modal'
+import PrivacyProofModalContent from './components/PrivacyProofModalContent'
 import ActivityLogsModalContent from './components/ActivityLogsModalContent'
 import BackgroundEffects from './components/BackgroundEffects'
 
@@ -17,13 +18,14 @@ const DevFontWorkshop = React.lazy(() => import('./components/DevTools').then(m 
 type ViewMode = 'home' | 'results'
 
 function App() {
-  const { query, setQuery, results, loading, error, logs, search, resetSearch } = useSearch()
+  const { query, setQuery, results, loading, error, hashed, hashValue, apiKeyError, logs, search, resetSearch } = useSearch()
   const { lat, lng } = useGeolocation()
   const [viewMode, setViewMode] = useState<ViewMode>('home')
   const [activeTab, setActiveTab] = useState<SearchTab>('all')
+  const [showProofModal, setShowProofModal] = useState(false)
   const [showLogsModal, setShowLogsModal] = useState(false)
 
-  useBodyScrollLock(showLogsModal)
+  useBodyScrollLock(showProofModal || showLogsModal)
 
   const handleSearch = useCallback(async () => {
     await search(lat, lng)
@@ -36,7 +38,9 @@ function App() {
     setActiveTab('all')
   }, [resetSearch])
 
+  const handleShowProof = useCallback(() => setShowProofModal(true), [])
   const handleShowLogs = useCallback(() => setShowLogsModal(true), [])
+  const handleCloseProof = useCallback(() => setShowProofModal(false), [])
   const handleCloseLogs = useCallback(() => setShowLogsModal(false), [])
   const handleNukeLogs = useCallback(() => {
     resetSearch()
@@ -55,6 +59,10 @@ function App() {
             onQueryChange={setQuery}
             onSearch={handleSearch}
             disabled={!query.trim()}
+            apiKeyError={apiKeyError}
+            hashed={hashed}
+            hashValue={hashValue}
+            onShowProof={handleShowProof}
           />
         </main>
       ) : (
@@ -65,6 +73,9 @@ function App() {
             onSearch={handleSearch}
             disabled={!query.trim()}
             onLogoClick={handleGoHome}
+            hashed={hashed}
+            hashValue={hashValue}
+            onShowProof={handleShowProof}
           />
           <SearchTabs activeTab={activeTab} onTabChange={setActiveTab} />
           <main className="flex-1 max-w-3xl mx-auto w-full px-4 pt-4 relative z-10 pb-16">
@@ -80,7 +91,7 @@ function App() {
               </button>
             </div>
             {activeTab === 'all' ? (
-              <ResultsList results={results} loading={loading} error={error} />
+              <ResultsList results={results} loading={loading} error={error} apiKeyError={apiKeyError} hashed={hashed} />
             ) : (
               <div className="text-center py-16 text-zinc-500 text-sm">
                 <p className="text-lg mb-2">Coming soon</p>
@@ -90,6 +101,10 @@ function App() {
           </main>
         </>
       )}
+
+      <Modal open={showProofModal} onClose={handleCloseProof} ariaLabel="Privacy Proof">
+        <PrivacyProofModalContent hashed={hashed} firstResult={results[0]} />
+      </Modal>
 
       <Modal open={showLogsModal} onClose={handleCloseLogs} ariaLabel="Activity Logs">
         <ActivityLogsModalContent logs={logs} onNukeLogs={handleNukeLogs} />
@@ -102,7 +117,9 @@ function App() {
 
       <footer className="fixed bottom-0 left-0 right-0 bg-deep-black/95 backdrop-blur-sm border-t border-zinc-800 py-2 z-20">
         <div className="flex items-center justify-center gap-3 text-xs">
-          <span className="text-zinc-500">Proxied via DuckDuckGo – no tracking, IP hidden</span>
+          <span className="text-zinc-500">Powered by Brave Search</span>
+          <span className="text-zinc-700">·</span>
+          <span className="text-zinc-500">Protected by NordVPN</span>
         </div>
       </footer>
     </div>
