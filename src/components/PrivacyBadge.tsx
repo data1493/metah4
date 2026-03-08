@@ -38,7 +38,7 @@ const PrivacyBadge = memo(function PrivacyBadge({ hashed, hashValue, onClick, va
       <span>
         {hashed && hashValue
           ? <span className="font-mono">{hashValue.slice(0, 12)}&hellip;</span>
-          : hashed ? 'Hashed on Device' : 'Privacy Protected'}
+          : hashed ? 'hashed on device + proxied anonymously' : 'Privacy Protected'}
       </span>
     </button>
   )

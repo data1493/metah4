@@ -113,3 +113,5 @@ App.tsx  ─── viewMode: 'home' | 'results'
 | 2026-03-06 | Phase 4 | PrivacyBadge with shield icon and idle/active states |
 | 2026-03-06 | Phase 5 | Permanent Marker + Bebas Neue fonts, brick texture, vinyl/boombox SVGs, Brave-style result cards with favicons, bounceIn animations |
 | 2026-03-06 | Phase 6 | Skeleton loading cards, accessibility (keyboard tabs, sr-only), responsive tabs, 42 tests passing |
+| 2026-03-08 | Proxy Integration | Frontend now hashes query and sends hash to Cloudflare proxy endpoint; debug logging added for proxy response status/data |
+| 2026-03-08 | Current Limitation | Proxy currently forwards hash directly to Brave, so Brave returns hash-literal results; backend decryption/translation flow is in progress |
