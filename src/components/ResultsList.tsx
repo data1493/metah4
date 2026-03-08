@@ -7,11 +7,9 @@ interface ResultsListProps {
   results: SearchResult[]
   loading: boolean
   error: string
-  apiKeyError: boolean
-  hashed: boolean
 }
 
-const ResultsList = memo(function ResultsList({ results, loading, error, apiKeyError, hashed }: ResultsListProps) {
+const ResultsList = memo(function ResultsList({ results, loading, error }: ResultsListProps) {
   if (loading) {
     return (
       <div className="space-y-4" role="status" aria-live="polite" aria-label="Loading search results">
@@ -31,15 +29,9 @@ const ResultsList = memo(function ResultsList({ results, loading, error, apiKeyE
     )
   }
 
-  if (!apiKeyError && hashed && results.length === 0) {
-    return (
-      <div className="text-center py-10 text-zinc-500 text-sm tracking-wide" role="status">
-        no results found
-      </div>
-    )
+  if (results.length === 0 && !loading && !error) {
+    return null
   }
-
-  if (results.length === 0) return null
 
   return (
     <>

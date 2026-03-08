@@ -1,6 +1,5 @@
 import { memo } from 'react'
 import SearchBar from './SearchBar'
-import PrivacyBadge from './PrivacyBadge'
 
 interface HeaderProps {
   query: string
@@ -8,12 +7,9 @@ interface HeaderProps {
   onSearch: () => void
   disabled: boolean
   onLogoClick: () => void
-  hashed: boolean
-  hashValue: string
-  onShowProof: () => void
 }
 
-const Header = memo(function Header({ query, onQueryChange, onSearch, disabled, onLogoClick, hashed, hashValue, onShowProof }: HeaderProps) {
+const Header = memo(function Header({ query, onQueryChange, onSearch, disabled, onLogoClick }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 bg-deep-black/90 backdrop-blur-md border-b border-zinc-800">
       <div className="max-w-5xl mx-auto flex items-center gap-4 px-4 py-2">
@@ -23,7 +19,7 @@ const Header = memo(function Header({ query, onQueryChange, onSearch, disabled, 
           className="flex-shrink-0 hover:opacity-80 transition-opacity"
           aria-label="Return to homepage"
         >
-          <img src="/images/logo2.png" alt="METAH4" className="h-8 md:h-10" />
+          <img src="/images/logo2a.png" alt="METAH4" className="h-12 md:h-14" />
         </button>
 
         {/* Compact search bar */}
@@ -36,9 +32,6 @@ const Header = memo(function Header({ query, onQueryChange, onSearch, disabled, 
             variant="header"
           />
         </div>
-
-        {/* Privacy badge */}
-        <PrivacyBadge hashed={hashed} hashValue={hashValue} onClick={onShowProof} variant="header" />
       </div>
     </header>
   )

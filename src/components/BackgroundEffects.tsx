@@ -9,6 +9,16 @@ const BackgroundEffects = memo(function BackgroundEffects({ variant = 'home' }: 
 
   return (
     <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
+      {/* Full-screen background image (home only) */}
+      {variant === 'home' && (
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: 'url(/images/bg1.JPG)' }}
+        >
+          <div className="absolute inset-0 bg-deep-black/60" />
+        </div>
+      )}
+
       {/* Base gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-deep-black via-zinc-900/20 to-deep-black" />
 
