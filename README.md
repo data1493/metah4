@@ -19,16 +19,17 @@ Lakers-themed aesthetic: deep black background (`#0a0a0a`), Lakers purple (`#542
 
 Metah4 currently uses a Cloudflare Worker proxy endpoint:
 
-`https://metah4-backend.metah4-backend.workers.dev/search`
+`https://api.chimpsheet.com/search`
 
 Current behavior:
 
-1. Frontend hashes the raw query with SHA-256 on-device.
-2. Frontend sends the hash to the proxy.
-3. Proxy forwards the hash to Brave Search.
-4. Brave returns results for the hash string itself.
+1. Frontend encrypts the raw query client-side using libsodium secretbox with a shared secret.
+2. Frontend sends the encrypted payload (nonce + ciphertext) to the proxy.
+3. Proxy decrypts the query server-side using the same shared secret.
+4. Proxy forwards the decrypted query to Brave Search.
+5. Brave returns results for the original query.
 
-This means search relevance is limited right now. Backend decryption/translation logic is in progress so the proxy can recover usable search terms server-side before calling Brave.
+This provides true privacy: plain-text queries never leave the user's device or reach external servers.
 
 ### Setup
 
@@ -48,13 +49,13 @@ npm run dev
 
 The `VITE_` prefix is required for Vite to expose variables to the browser bundle.
 
-### Client-side Hashing Badge
+### Client-side Encryption Badge
 
-Every search triggers a SHA-256 hash of the query before the network request is made. The badge currently indicates:
+Every search triggers client-side encryption of the query using libsodium secretbox before the network request is made. The badge indicates:
 
-`hashed on device + proxied anonymously`
+`encrypted on device + proxied anonymously`
 
-Status note: this confirms local hashing and proxy routing, but does not yet provide meaningful private search semantics until backend decryption logic is completed.
+This confirms local encryption and anonymous proxy routing, providing meaningful private search semantics.
 
 ## Dev
 

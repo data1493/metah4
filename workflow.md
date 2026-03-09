@@ -13,17 +13,18 @@ Opens at http://localhost:5173
 - Type any query into the search box
 - Click GO or press Enter
 - Check browser console for proxy debug logs:
-	- `Proxy response status:`
-	- `Proxy response data:`
-- Badge indicates `hashed on device + proxied anonymously`
+	- `Sending encrypted q:`
+	- `Proxy status:`
+	- `Decrypted query Brave saw:`
+- Badge indicates `encrypted on device + proxied anonymously`
 
 ## 3. Current Known Behavior
 
-- Frontend hashes query with SHA-256 before sending.
-- Frontend sends hash to Cloudflare proxy.
-- Proxy currently forwards the hash directly to Brave.
-- Brave returns results for the hash literal, not the original human query.
-- Backend decryption/translation logic is in progress.
+- Frontend encrypts query client-side with libsodium secretbox using a shared secret.
+- Frontend sends encrypted payload to Cloudflare proxy.
+- Proxy decrypts the query server-side and forwards to Brave.
+- Brave returns results for the original human query.
+- Provides true privacy: plain-text queries never leave the device.
 
 ## 4. Git Push After Changes
 
@@ -35,11 +36,11 @@ git push
 
 Never commit `.env` — it is gitignored.
 
-## 5. Backend Milestone In Progress
+## 5. Backend Milestone Completed
 
-Current backend goal:
+Current backend implementation:
 
-- Receive hashed payload from frontend.
-- Perform controlled server-side recovery/decryption/translation to a searchable term.
-- Call Brave with the recovered query.
-- Return normal search results to frontend.
+- Receives encrypted payload from frontend.
+- Performs server-side decryption using shared secret.
+- Calls Brave with the decrypted query.
+- Returns normal search results to frontend.

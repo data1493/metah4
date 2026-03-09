@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import axios from 'axios'
+import sodium from 'libsodium-wrappers'
 import { hashQuery } from './hooks/useSearch'
 import { useBodyScrollLock } from './hooks/useBodyScrollLock'
 import type { SearchTab, SearchResult, LogEntry } from './types'
@@ -15,7 +16,8 @@ import BackgroundEffects from './components/BackgroundEffects'
 const DevColorPicker = React.lazy(() => import('./components/DevTools').then(m => ({ default: m.DevColorPicker })))
 const DevFontWorkshop = React.lazy(() => import('./components/DevTools').then(m => ({ default: m.DevFontWorkshop })))
 
-const PROXY_URL = 'https://metah4-backend.metah4-backend.workers.dev/search'
+const PROXY_URL = 'https://api.chimpsheet.com/search';
+const SHARED_SECRET = '9133097f1f17309525e260fcb55d71365754e90fd0733b08d392bb405534a849'
 
 type ViewMode = 'home' | 'results'
 
@@ -45,7 +47,27 @@ function App() {
     const queryHash = await hashQuery(query.trim())
 
     newLogs.push({ timestamp: new Date(), message: `Hash completed: ${queryHash.slice(0, 16)}...` })
-    newLogs.push({ timestamp: new Date(), message: 'Sending hashed query to proxy...' })
+    newLogs.push({ timestamp: new Date(), message: 'Initializing encryption...' })
+
+    await sodium.ready
+
+    if (SHARED_SECRET.length !== 64) {
+      console.warn('Invalid SHARED_SECRET length')
+      setResults([{ error: 'Encryption key invalid – check App.tsx' }])
+      return
+    }
+
+    const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES)
+    const ciphertext = sodium.crypto_secretbox_easy(sodium.from_string(query.trim()), nonce, sodium.from_hex(SHARED_SECRET))
+    const combined = new Uint8Array(nonce.length + ciphertext.length)
+    combined.set(nonce)
+    combined.set(ciphertext, nonce.length)
+    const encryptedBase64 = sodium.to_base64(combined, sodium.base64_variants.ORIGINAL)
+
+    console.log('Sending encrypted q:', encryptedBase64)
+    console.log('Nonce length:', nonce.length, 'Ciphertext length:', ciphertext.length)
+
+    newLogs.push({ timestamp: new Date(), message: 'Encryption completed, sending to proxy...' })
 
     setHashValue(queryHash)
     setHashed(true)
@@ -55,11 +77,26 @@ function App() {
     setLogs(prev => [...prev, ...newLogs])
 
     try {
-      const res = await axios.get(`${PROXY_URL}?q=${encodeURIComponent(queryHash)}`)
-      console.log('Proxy response status:', res.status)
-      console.log('Proxy response data:', res.data)
+      const res = await axios.get(`${PROXY_URL}?q=${encodeURIComponent(encryptedBase64)}`)
+      console.log('Proxy status:', res.status, 'Data keys:', Object.keys(res.data || {}))
+      console.log('Proxy URL called:', `${PROXY_URL}?q=${encodeURIComponent(encryptedBase64)}`)
+      console.log('Response status:', res.status)
+      console.log('Response data:', res.data)
+      console.log('Response headers:', res.headers)
 
-      if (res.data?.web?.results?.length > 0) {
+      console.log('Proxy response:', res.status, res.data)
+
+      if (res.data.type === 'search' && res.data.query?.original) {
+        console.log('Decrypted query Brave saw:', res.data.query.original)
+      }
+
+      if (res.status !== 200) {
+        setResults([{ error: 'Proxy decryption failed – wrong key?' }])
+        setLogs(prev => [...prev, { timestamp: new Date(), message: 'Backend decryption failed' }])
+      } else if (res.data?.type === 'search' && !res.data.web?.results) {
+        setResults([{ error: 'Decryption likely failed – globe navigational result' }])
+        setLogs(prev => [...prev, { timestamp: new Date(), message: 'Decryption likely failed – globe navigational result' }])
+      } else if (res.data?.web?.results?.length > 0) {
         const mapped: SearchResult[] = res.data.web.results.map((r: any) => ({
           title: r.title || 'No title',
           description: r.description || 'No description',
@@ -70,15 +107,17 @@ function App() {
         }))
         setResults(mapped)
         setLogs(prev => [...prev, { timestamp: new Date(), message: `Search results received — ${mapped.length} result(s)` }])
+      } else if (res.status === 200 && !res.data?.web?.results) {
+        setResults([{ error: 'No results – decryption may have failed on proxy' }])
+        setLogs(prev => [...prev, { timestamp: new Date(), message: 'No results – decryption may have failed on proxy' }])
       } else {
         setResults([])
         setError('No results returned from proxy')
         setLogs(prev => [...prev, { timestamp: new Date(), message: 'No results returned from proxy' }])
       }
     } catch (err: any) {
-      console.error('Search error:', err)
-      setResults([])
-      setError('Proxy / network error – check console')
+      console.error('Full search error:', err.message, err.response?.data, err.response?.status)
+      setResults([{ error: `Proxy error: ${err.message} (status ${err.response?.status || 'unknown'})` }])
       setLogs(prev => [...prev, { timestamp: new Date(), message: `Error: ${err?.message || 'Proxy / network error'}` }])
     } finally {
       setLoading(false)
