@@ -72,6 +72,11 @@ export default defineConfig(({ mode }) => {
       css: false,
     },
     server: {
+      hmr: {
+        protocol: 'ws',
+        host: 'localhost',
+        port: 5173,
+      },
       proxy: {
         '/api/brave': {
           target: 'https://api.search.brave.com',
@@ -81,6 +86,11 @@ export default defineConfig(({ mode }) => {
             'X-Subscription-Token': env.VITE_BRAVE_SEARCH_API_KEY ?? '',
             'Accept': 'application/json',
           },
+        },
+        '/api/chimp': {
+          target: 'https://api.chimpsheet.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/chimp/, ''),
         },
       },
     },

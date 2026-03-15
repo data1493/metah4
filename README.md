@@ -17,19 +17,15 @@ Lakers-themed aesthetic: deep black background (`#0a0a0a`), Lakers purple (`#542
 
 ## Current Search Flow
 
-Metah4 currently uses a Cloudflare Worker proxy endpoint:
-
-`https://api.chimpsheet.com/search`
-
-Current behavior:
+Metah4 routes search through a Cloudflare Worker proxy (`https://api.chimpsheet.com/search`). In dev, requests go through the Vite proxy at `/api/chimp/search` to avoid CORS.
 
 1. Frontend encrypts the raw query client-side using libsodium secretbox with a shared secret.
-2. Frontend sends the encrypted payload (nonce + ciphertext) to the proxy.
+2. Frontend sends the encrypted payload (nonce + ciphertext) to `/api/chimp/search` (Vite proxies to the Cloudflare Worker).
 3. Proxy decrypts the query server-side using the same shared secret.
 4. Proxy forwards the decrypted query to Brave Search.
 5. Brave returns results for the original query.
 
-This provides true privacy: plain-text queries never leave the user's device or reach external servers.
+This provides true privacy: plain-text queries never leave the user's device or reach external servers. End-to-end encryption and search is fully verified working.
 
 ### Setup
 

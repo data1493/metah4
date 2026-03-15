@@ -36,11 +36,16 @@ git push
 
 Never commit `.env` — it is gitignored.
 
-## 5. Backend Milestone Completed
+## 5. End-to-End Search: Fully Working ✅
 
-Current backend implementation:
+- Frontend encrypts query with libsodium secretbox.
+- Vite dev proxy (`/api/chimp/search`) forwards to `https://api.chimpsheet.com/search`, resolving CORS in dev.
+- Cloudflare Worker decrypts the payload server-side using the shared secret.
+- Brave Search receives the original plain-text query and returns results.
+- Frontend maps and renders results correctly.
+- Confirmed working: `Decrypted query Brave saw: pizza` — 200 OK with full web/news/video payload.
 
-- Receives encrypted payload from frontend.
-- Performs server-side decryption using shared secret.
-- Calls Brave with the decrypted query.
-- Returns normal search results to frontend.
+## 6. Vite Config Notes
+
+- HMR explicitly configured (`ws://localhost:5173`) to prevent WebSocket connection failures in dev.
+- Proxy entries: `/api/brave` → Brave Search API (direct key usage), `/api/chimp` → Cloudflare Worker proxy.

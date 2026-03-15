@@ -16,7 +16,7 @@ import BackgroundEffects from './components/BackgroundEffects'
 const DevColorPicker = React.lazy(() => import('./components/DevTools').then(m => ({ default: m.DevColorPicker })))
 const DevFontWorkshop = React.lazy(() => import('./components/DevTools').then(m => ({ default: m.DevFontWorkshop })))
 
-const PROXY_URL = 'https://api.chimpsheet.com/search';
+const PROXY_URL = '/api/chimp/search';
 const SHARED_SECRET = '9133097f1f17309525e260fcb55d71365754e90fd0733b08d392bb405534a849'
 
 type ViewMode = 'home' | 'results'
