@@ -2,12 +2,12 @@ import { memo } from 'react'
 
 interface LocationToggleProps {
   enabled: boolean
-  country: string | null
+  label: string | null
   error: string
   onToggle: () => void
 }
 
-const LocationToggle = memo(function LocationToggle({ enabled, country, error, onToggle }: LocationToggleProps) {
+const LocationToggle = memo(function LocationToggle({ enabled, label, error, onToggle }: LocationToggleProps) {
   return (
     <div className="flex flex-col items-end gap-1">
       <button
@@ -40,7 +40,7 @@ const LocationToggle = memo(function LocationToggle({ enabled, country, error, o
             d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
           />
         </svg>
-        {enabled && country ? `Local · ${country}` : 'Local results'}
+        {enabled && label ? `Local · ${label}` : 'Local results'}
       </button>
       {error && (
         <span className="text-xs text-red-400">{error}</span>

@@ -1,4 +1,4 @@
-# Plan: Location-Based Search Results (Option 1 — Browser Geolocation)
+# Plan: City/Region-Level Local Search Results
 
 ## Ownership
 
@@ -7,55 +7,80 @@
 | Frontend (React/Vite) | Frontend agent | `metah4` (this repo) |
 | Backend (Cloudflare Worker / chimpsheet) | Backend agent | separate repo |
 
-**Frontend agent scope:** Everything in `src/` and `vite.config.ts`. Does NOT touch backend Worker code.
-**Backend agent scope:** The Cloudflare Worker at `api.chimpsheet.com` that receives requests, decrypts `q`, and calls Brave Search. Must be updated to read and forward the `country` param to Brave.
-
 ---
 
 ## Context
-Currently, the Brave Search API is called with only a `q` param (encrypted query). Brave supports a `country` query param that biases results to a geographic region. This plan adds an explicit opt-in geolocation feature that resolves the user's country code locally (no third-party reverse-geocode API) and appends it to the search request.
+The current location feature only resolves country-level precision (e.g., `country=US`) derived from the browser timezone — GPS coordinates are requested but discarded. Brave's web search API has no native city/coordinates param, so city-level bias requires the backend to append location context directly to the decrypted query before it reaches Brave (e.g., `pizza` → `pizza near Seattle, WA`).
 
 ---
 
 ## Approach
 
-### Country Resolution Strategy
-Use `navigator.geolocation.getCurrentPosition()` to confirm user consent + get coordinates, then derive country from the browser's timezone via `Intl.DateTimeFormat().resolvedOptions().timeZone` mapped against a bundled timezone→country lookup. This keeps location resolution **fully in-browser** — no reverse-geocode API call, no leaking coordinates to any server.
+1. **Capture actual GPS coordinates** in the geolocation success callback (currently discarded)
+2. **Reverse geocode to city** using the Nominatim API (OpenStreetMap, free, no key) — privacy note: coordinates are sent to `nominatim.openstreetmap.org`; this is disclosed to the user via the toggle
+3. **Store `userCity`** state (e.g., `"Seattle, WA"`) alongside existing `userCountry`
+4. **Send `city` param** to the proxy (plain text, alongside `country`) — e.g., `city=Seattle%2C+WA`
+5. **Display city in toggle** — e.g., `Local · Seattle, WA` instead of `Local · US`
 
 ---
 
-## Frontend Changes — `src/App.tsx`
+## Frontend Changes
 
-1. **Add state** (alongside existing `useState` hooks, lines 25–35):
+### `src/App.tsx`
+
+1. **Add state:**
    ```ts
-   const [locationEnabled, setLocationEnabled] = useState(false)
-   const [userCountry, setUserCountry] = useState<string | null>(null)
+   const [userCity, setUserCity] = useState<string | null>(null)
    ```
 
-2. **Add `enableLocation` handler** (new `useCallback`):
-   - Call `navigator.geolocation.getCurrentPosition()`
-   - On success: derive country from `Intl.DateTimeFormat().resolvedOptions().timeZone` using a small inline timezone→ISO-3166-1-alpha-2 map
-   - `setUserCountry(code)`, `setLocationEnabled(true)`
-   - On error/denied: show a brief inline error, leave `locationEnabled` false
-
-3. **Append `country` param to Axios call** (line 80):
+2. **Update `handleToggleLocation`** — use actual coords from geolocation success callback to reverse geocode via Nominatim:
    ```ts
-   const params: Record<string, string> = { q: encodeURIComponent(encryptedBase64) }
+   navigator.geolocation.getCurrentPosition(
+     async (position) => {
+       const { latitude, longitude } = position.coords
+       // reverse geocode
+       const res = await fetch(
+         `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&zoom=10`,
+         { headers: { 'Accept-Language': 'en' } }
+       )
+       const data = await res.json()
+       const city = data.address?.city || data.address?.town || data.address?.county || null
+       const state = data.address?.state_code || data.address?.state || null
+       const cityLabel = [city, state].filter(Boolean).join(', ')
+       // existing timezone→country logic stays
+       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+       const country = timezoneToCountry(tz)
+       setUserCountry(country)
+       setUserCity(cityLabel || null)
+       setLocationEnabled(true)
+     },
+     ...
+   )
+   ```
+
+3. **Update Axios params:**
+   ```ts
+   const params: Record<string, string> = { q: encryptedBase64 }
    if (locationEnabled && userCountry) params.country = userCountry
+   if (locationEnabled && userCity) params.city = userCity
    const res = await axios.get(PROXY_URL, { params })
    ```
 
-4. **Add opt-in toggle UI** — a small pill button near the search bar (home + results views), styled with existing design tokens:
-   - Off state: zinc-gray neutral (like un-hashed PrivacyBadge)
-   - On state: neon-purple glow (distinct from the neon-green privacy badge)
-   - Label: "Local results OFF / ON · [Country]"
-   - Clicking while ON: clears state, sets `locationEnabled` false
+4. **Clear `userCity` on toggle off** (in existing disable branch):
+   ```ts
+   setUserCity(null)
+   ```
 
----
+5. **Pass `userCity` to `LocationToggle`** via `HomePage` and `Header` props.
 
-## Proxy — `vite.config.ts` (Frontend)
+### `src/components/LocationToggle.tsx`
 
-No structural change needed. The `/api/chimp` proxy (`lines 90–94`) is a plain path-rewrite; extra query params pass through to `api.chimpsheet.com` automatically — the `country` param will arrive at the Worker.
+- Replace `country` prop with a single `label` prop (e.g., `"Seattle, WA"` when city known, `"US"` fallback)
+- Display: `Local · Seattle, WA`
+
+### `src/components/HomePage.tsx` / `src/components/Header.tsx`
+
+- Pass `userCity ?? userCountry` as the label to `LocationToggle`
 
 ---
 
@@ -63,53 +88,40 @@ No structural change needed. The `/api/chimp` proxy (`lines 90–94`) is a plain
 
 > **This section is for the backend agent. Frontend agent does not touch this.**
 
-The Worker currently:
-1. Receives `?q=<encrypted>` from the frontend
-2. Decrypts `q` → plain-text query
-3. Calls Brave Search API with only `q`
+**Required change:** Read the `city` query param from the incoming request and append it to the decrypted plain-text query before calling Brave:
 
-**Required change:** Read the `country` query param from the incoming request and forward it to Brave Search:
 ```
-GET https://api.search.brave.com/res/v1/web/search?q=<plaintext>&country=US
+incoming: ?q=<encrypted>&country=US&city=Seattle%2C+WA
+
+decrypted query: "pizza"
+brave call:      GET .../web/search?q=pizza+near+Seattle%2C+WA&country=US
 ```
-If `country` is absent (toggle is off), omit it — Brave defaults to global results.
 
-**Contract between repos:**
-- Frontend sends: `GET /search?q=<encrypted_base64>&country=<ISO-3166-1-alpha-2>` (country optional)
-- Worker must: pass `country` value through to Brave unchanged if present
+If `city` is absent, behavior is unchanged. `country` without `city` stays as-is.
 
----
-
-## New Utility — `src/utils/timezoneToCountry.ts`
-
-A small inline map (~40 most common IANA timezone prefixes → ISO country code). Example:
-```ts
-export function timezoneToCountry(tz: string): string | null {
-  const map: Record<string, string> = {
-    'America/New_York': 'US', 'America/Los_Angeles': 'US',
-    'Europe/London': 'GB', 'Europe/Paris': 'FR',
-    'Asia/Tokyo': 'JP', 'Asia/Kolkata': 'IN',
-    // ... ~40 entries
-  }
-  return map[tz] ?? null
-}
-```
-No external dependency. Falls back to `null` (location feature silently disabled) for unrecognized timezones.
+**Updated contract between repos:**
+- Frontend sends: `GET /search?q=<encrypted_base64>[&country=<ISO>][&city=<city, state>]`
+- Worker: appends `near <city>` to decrypted query if `city` present; passes `country` unchanged
 
 ---
 
 ## Critical Files
-- `src/App.tsx` — state, handler, Axios call (lines 25–35, 80)
-- `vite.config.ts` — proxy config (lines 90–94); possible fallback route
-- `src/utils/timezoneToCountry.ts` — new file (small utility)
+- `src/App.tsx` — `handleToggleLocation`, Axios params, `userCity` state
+- `src/components/LocationToggle.tsx` — label prop update
+- `src/components/HomePage.tsx` — pass city label
+- `src/components/Header.tsx` — pass city label
+
+---
+
+## Privacy Note
+Nominatim (OpenStreetMap) receives the user's GPS coordinates for reverse geocoding. This is a trade-off disclosed by the act of enabling the location toggle. Coordinates are not stored or logged by the frontend.
 
 ---
 
 ## Verification
-1. Run dev server (`npm run dev`)
-2. Click the location toggle → browser permission prompt appears
-3. Grant permission → button shows "ON · US" (or local country)
-4. Run a search → confirm results are region-biased (e.g., search "news" and compare with toggle off)
-5. Deny permission → toggle stays off, no console errors
-6. Toggle off after enabling → country clears, next search sends no `country` param
-7. Check Network tab: `country=US` present in the proxied request when enabled
+1. Enable location toggle → browser permission prompt fires
+2. Toggle shows `Local · Seattle, WA` (or local city)
+3. Network tab: `city=Seattle%2C+WA&country=US` in outbound request
+4. Once backend is deployed: search "coffee shops" → results biased to local city
+5. Toggle off → `userCity` clears, next search sends no city/country params
+6. Run `npm test` — all tests pass

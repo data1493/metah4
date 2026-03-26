@@ -12,12 +12,12 @@ interface HomePageProps {
   hashValue: string
   onShowProof: () => void
   locationEnabled: boolean
-  userCountry: string | null
+  locationLabel: string | null
   locationError: string
   onToggleLocation: () => void
 }
 
-const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabled, hashed, hashValue, onShowProof, locationEnabled, userCountry, locationError, onToggleLocation }: HomePageProps) {
+const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabled, hashed, hashValue, onShowProof, locationEnabled, locationLabel, locationError, onToggleLocation }: HomePageProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
       <img
@@ -40,7 +40,7 @@ const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabl
         <div className="flex justify-end mt-2">
           <LocationToggle
             enabled={locationEnabled}
-            country={userCountry}
+            label={locationLabel}
             error={locationError}
             onToggle={onToggleLocation}
           />
