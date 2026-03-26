@@ -7,31 +7,41 @@ const mockResults = [
   { title: 'Result 2', description: 'Desc 2', url: 'https://two.com', hash: '', domain: 'two.com', isLocal: false },
 ]
 
+const baseProps = {
+  activeTab: 'all' as const,
+  results: [],
+  imageResults: [],
+  videoResults: [],
+  newsResults: [],
+  loading: false,
+  error: '',
+}
+
 describe('ResultsList', () => {
   it('shows loading state with skeleton cards', () => {
-    render(<ResultsList results={[]} loading={true} error="" />)
+    render(<ResultsList {...baseProps} loading={true} />)
     expect(screen.getByRole('status')).toBeInTheDocument()
     expect(screen.getByText('Loading search results...')).toBeInTheDocument()
   })
 
   it('shows error state', () => {
-    render(<ResultsList results={[]} loading={false} error="network error" />)
+    render(<ResultsList {...baseProps} error="network error" />)
     expect(screen.getByText(/network error/)).toBeInTheDocument()
   })
 
   it('renders result cards when results exist', () => {
-    render(<ResultsList results={mockResults} loading={false} error="" />)
+    render(<ResultsList {...baseProps} results={mockResults} />)
     expect(screen.getByText('Result 1')).toBeInTheDocument()
     expect(screen.getByText('Result 2')).toBeInTheDocument()
   })
 
   it('renders pagination when results exist', () => {
-    render(<ResultsList results={mockResults} loading={false} error="" />)
+    render(<ResultsList {...baseProps} results={mockResults} />)
     expect(screen.getByText('Page')).toBeInTheDocument()
   })
 
-  it('renders nothing before search', () => {
-    const { container } = render(<ResultsList results={[]} loading={false} error="" />)
-    expect(container.innerHTML).toBe('')
+  it('shows empty message when no results', () => {
+    render(<ResultsList {...baseProps} />)
+    expect(screen.getByText(/No results found/)).toBeInTheDocument()
   })
 })

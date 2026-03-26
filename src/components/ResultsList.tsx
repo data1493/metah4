@@ -1,15 +1,22 @@
 import { memo } from 'react'
-import type { SearchResult } from '../types'
+import type { SearchResult, BraveImageResult, BraveVideoResult, BraveNewsResult, SearchTab } from '../types'
 import ResultCard from './ResultCard'
+import ImageResultCard from './ImageResultCard'
+import VideoResultCard from './VideoResultCard'
+import NewsResultCard from './NewsResultCard'
 import SkeletonCard from './SkeletonCard'
 
 interface ResultsListProps {
+  activeTab: SearchTab
   results: SearchResult[]
+  imageResults: BraveImageResult[]
+  videoResults: BraveVideoResult[]
+  newsResults: BraveNewsResult[]
   loading: boolean
   error: string
 }
 
-const ResultsList = memo(function ResultsList({ results, loading, error }: ResultsListProps) {
+const ResultsList = memo(function ResultsList({ activeTab, results, imageResults, videoResults, newsResults, loading, error }: ResultsListProps) {
   if (loading) {
     return (
       <div className="space-y-4" role="status" aria-live="polite" aria-label="Loading search results">
@@ -29,8 +36,48 @@ const ResultsList = memo(function ResultsList({ results, loading, error }: Resul
     )
   }
 
-  if (results.length === 0 && !loading && !error) {
-    return null
+  if (activeTab === 'images') {
+    if (imageResults.length === 0) {
+      return <div className="text-center py-8 text-zinc-500 text-sm">No images found. Try another search.</div>
+    }
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3" role="list" aria-label="Image results">
+        {imageResults.map((r, i) => (
+          <ImageResultCard key={`${r.url}-${i}`} result={r} index={i} />
+        ))}
+      </div>
+    )
+  }
+
+  if (activeTab === 'videos') {
+    if (videoResults.length === 0) {
+      return <div className="text-center py-8 text-zinc-500 text-sm">No videos found. Try another search.</div>
+    }
+    return (
+      <div className="space-y-4" role="list" aria-label="Video results">
+        {videoResults.map((r, i) => (
+          <VideoResultCard key={`${r.url}-${i}`} result={r} index={i} />
+        ))}
+      </div>
+    )
+  }
+
+  if (activeTab === 'news') {
+    if (newsResults.length === 0) {
+      return <div className="text-center py-8 text-zinc-500 text-sm">No news found. Try another search.</div>
+    }
+    return (
+      <div className="space-y-4" role="list" aria-label="News results">
+        {newsResults.map((r, i) => (
+          <NewsResultCard key={`${r.url}-${i}`} result={r} index={i} />
+        ))}
+      </div>
+    )
+  }
+
+  // 'all' tab (web results)
+  if (results.length === 0) {
+    return <div className="text-center py-8 text-zinc-500 text-sm">No results found. Try another search.</div>
   }
 
   return (

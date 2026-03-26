@@ -84,6 +84,33 @@ export default defineConfig(({ mode }) => {
             'Accept': 'application/json',
           },
         },
+        '/api/brave-images': {
+          target: 'https://api.search.brave.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/brave-images/, '/res/v1/images/search'),
+          headers: {
+            'X-Subscription-Token': env.VITE_BRAVE_SEARCH_API_KEY ?? '',
+            'Accept': 'application/json',
+          },
+        },
+        '/api/brave-videos': {
+          target: 'https://api.search.brave.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/brave-videos/, '/res/v1/videos/search'),
+          headers: {
+            'X-Subscription-Token': env.VITE_BRAVE_SEARCH_API_KEY ?? '',
+            'Accept': 'application/json',
+          },
+        },
+        '/api/brave-news': {
+          target: 'https://api.search.brave.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/brave-news/, '/res/v1/news/search'),
+          headers: {
+            'X-Subscription-Token': env.VITE_BRAVE_SEARCH_API_KEY ?? '',
+            'Accept': 'application/json',
+          },
+        },
         '/api/chimp': {
           target: 'https://api.chimpsheet.com',
           changeOrigin: true,

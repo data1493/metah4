@@ -2,7 +2,8 @@ import React, { useState, useCallback } from 'react'
 import axios from 'axios'
 import { useBodyScrollLock } from './hooks/useBodyScrollLock'
 import { timezoneToCountry } from './utils/timezoneToCountry'
-import type { SearchTab, SearchResult, LogEntry } from './types'
+import { API } from './config'
+import type { SearchTab, SearchResult, BraveImageResult, BraveVideoResult, BraveNewsResult, LogEntry } from './types'
 import HomePage from './components/HomePage'
 import Header from './components/Header'
 import SearchTabs from './components/SearchTabs'
@@ -20,6 +21,9 @@ type ViewMode = 'home' | 'results'
 function App() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
+  const [imageResults, setImageResults] = useState<BraveImageResult[]>([])
+  const [videoResults, setVideoResults] = useState<BraveVideoResult[]>([])
+  const [newsResults, setNewsResults] = useState<BraveNewsResult[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [logs, setLogs] = useState<LogEntry[]>([])
@@ -34,29 +38,30 @@ function App() {
 
   useBodyScrollLock(showProofModal || showLogsModal)
 
-  const handleSearch = useCallback(async () => {
+  const handleSearch = useCallback(async (tab: SearchTab = activeTab) => {
     if (!query.trim()) return
 
     setLoading(true)
-    setResults([])
     setError('')
+
+    const effectiveQuery = locationEnabled && userCity
+      ? `${query.trim()} near ${userCity}`
+      : query.trim()
+
+    const baseParams: Record<string, string | number> = { q: effectiveQuery, count: API.RESULTS_PER_PAGE }
+    if (locationEnabled && userCountry) baseParams.country = userCountry
 
     const newLogs: LogEntry[] = [
       { timestamp: new Date(), message: `Query received: "${query.trim()}"` },
-      { timestamp: new Date(), message: 'Sending query to search API...' },
+      { timestamp: new Date(), message: `Searching ${tab} tab...` },
     ]
     setLogs(prev => [...prev, ...newLogs])
 
     try {
-      const effectiveQuery = locationEnabled && userCity
-        ? `${query.trim()} near ${userCity}`
-        : query.trim()
-      const params: Record<string, string | number> = { q: effectiveQuery, count: 10 }
-      if (locationEnabled && userCountry) params.country = userCountry
-      const res = await axios.get('/api/brave', { params })
-
-      if (res.data?.web?.results?.length > 0) {
-        const mapped: SearchResult[] = res.data.web.results.map((r: any) => ({
+      if (tab === 'all') {
+        setResults([])
+        const res = await axios.get(API.BRAVE_SEARCH, { params: baseParams })
+        const mapped: SearchResult[] = (res.data?.web?.results ?? []).map((r: any) => ({
           title: r.title || 'No title',
           description: r.description || 'No description',
           url: r.url || '#',
@@ -65,25 +70,54 @@ function App() {
           isLocal: false,
         }))
         setResults(mapped)
-        setLogs(prev => [...prev, { timestamp: new Date(), message: `Search results received — ${mapped.length} result(s)` }])
-      } else {
-        setResults([])
+        setLogs(prev => [...prev, { timestamp: new Date(), message: `${mapped.length} web result(s) received` }])
+      } else if (tab === 'images') {
+        setImageResults([])
+        const res = await axios.get(API.BRAVE_IMAGES, { params: baseParams })
+        const imgs: BraveImageResult[] = res.data?.results ?? []
+        setImageResults(imgs)
+        setLogs(prev => [...prev, { timestamp: new Date(), message: `${imgs.length} image result(s) received` }])
+      } else if (tab === 'videos') {
+        setVideoResults([])
+        const res = await axios.get(API.BRAVE_VIDEOS, { params: baseParams })
+        const vids: BraveVideoResult[] = res.data?.results ?? []
+        setVideoResults(vids)
+        setLogs(prev => [...prev, { timestamp: new Date(), message: `${vids.length} video result(s) received` }])
+      } else if (tab === 'news') {
+        setNewsResults([])
+        const res = await axios.get(API.BRAVE_NEWS, { params: baseParams })
+        const news: BraveNewsResult[] = res.data?.results ?? []
+        setNewsResults(news)
+        setLogs(prev => [...prev, { timestamp: new Date(), message: `${news.length} news result(s) received` }])
+      }
+
+      if (tab === 'all' && results.length === 0) {
         setError('No results returned')
-        setLogs(prev => [...prev, { timestamp: new Date(), message: 'No results returned' }])
       }
     } catch (err: any) {
-      setResults([])
       setError(`Search error: ${err.message}`)
       setLogs(prev => [...prev, { timestamp: new Date(), message: `Error: ${err?.message || 'Network error'}` }])
     } finally {
       setLoading(false)
       setViewMode('results')
     }
-  }, [query, locationEnabled, userCountry, userCity])
+  }, [query, activeTab, locationEnabled, userCountry, userCity, results.length])
+
+  const handleTabChange = useCallback((tab: SearchTab) => {
+    setActiveTab(tab)
+    setError('')
+    // Re-run search for new tab if we're already showing results and have a query
+    if (viewMode === 'results' && query.trim()) {
+      handleSearch(tab)
+    }
+  }, [viewMode, query, handleSearch])
 
   const resetSearch = useCallback(() => {
     setQuery('')
     setResults([])
+    setImageResults([])
+    setVideoResults([])
+    setNewsResults([])
     setError('')
     setLogs([])
   }, [])
@@ -176,7 +210,7 @@ function App() {
             locationLabel={userCity ?? userCountry}
             onToggleLocation={handleToggleLocation}
           />
-          <SearchTabs activeTab={activeTab} onTabChange={setActiveTab} />
+          <SearchTabs activeTab={activeTab} onTabChange={handleTabChange} />
           <main className="flex-1 max-w-3xl mx-auto w-full px-4 pt-4 relative z-10 pb-16">
             {/* Activity logs button */}
             <div className="flex justify-end mb-3">
@@ -189,21 +223,15 @@ function App() {
                 Logs
               </button>
             </div>
-            {activeTab === 'all' ? (
-              <>
-                <ResultsList results={results} loading={loading} error={error} />
-                {!loading && !error && results.length === 0 && (
-                  <div className="text-center py-8 text-zinc-500 text-sm" role="status">
-                    No results found. Try another search.
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-16 text-zinc-500 text-sm">
-                <p className="text-lg mb-2">Coming soon</p>
-                <p>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} search is under development</p>
-              </div>
-            )}
+            <ResultsList
+              activeTab={activeTab}
+              results={results}
+              imageResults={imageResults}
+              videoResults={videoResults}
+              newsResults={newsResults}
+              loading={loading}
+              error={error}
+            />
           </main>
         </>
       )}
