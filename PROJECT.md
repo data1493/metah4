@@ -81,7 +81,7 @@ App.tsx  ─── viewMode: 'home' | 'results'
 | Colors | Not changing — gold/purple stays (branch-specific) |
 | Primary logo | logo2.png everywhere |
 | Brave sidebar | Excluded from scope |
-| Tab function | UI-only stubs for Images/Videos/News |
+| Tab function | Images/Videos/News fully wired to Brave endpoints (Phase 8+) |
 | Hip-hop era | 90s Golden Era (boom-bap, graffiti, vinyl) |
 | Background approach | CSS/SVG patterns (no heavy image downloads) |
 | Favicon source | Google favicon API for result cards |
@@ -113,5 +113,41 @@ App.tsx  ─── viewMode: 'home' | 'results'
 | 2026-03-06 | Phase 4 | PrivacyBadge with shield icon and idle/active states |
 | 2026-03-06 | Phase 5 | Permanent Marker + Bebas Neue fonts, brick texture, vinyl/boombox SVGs, Brave-style result cards with favicons, bounceIn animations |
 | 2026-03-06 | Phase 6 | Skeleton loading cards, accessibility (keyboard tabs, sr-only), responsive tabs, 42 tests passing |
+
+---
+
+## ⚠️ Pre-broken on non-encrypt-main (fix on main before merge)
+
+- `src/hooks/useSearch.ts` — syntax is malformed after encryption strip (interface body and function body were mismerged). File compiles but is invalid TypeScript.
+- `src/test/useSearch.test.ts` — imports `hashQuery` which no longer exists after the strip. Tests will fail.
+
+---
+
+### Phase 7 — Pre-work + Location Precision (non-encrypt-main)
+
+- [ ] Fix `useSearch.ts` — restore as valid, properly structured hook
+- [ ] Fix `useSearch.test.ts` — remove `hashQuery` import, update tests
+- [ ] `App.tsx`: store `userLat`/`userLng` from `getCurrentPosition`
+- [ ] `App.tsx`: append `near <city>` to query string when location enabled (Brave ignores unknown params like `city`)
+- [ ] Remove unused `params.city` pass-through
+
+### Phase 8 — Full Tab Implementation (Images / Videos / News)
+
+- [ ] `vite.config.ts`: add proxy routes `/api/brave-images`, `/api/brave-videos`, `/api/brave-news`
+- [ ] `src/config.ts`: add `BRAVE_IMAGES`, `BRAVE_VIDEOS`, `BRAVE_NEWS` constants
+- [ ] `src/types.ts`: add `BraveImageResult`, `BraveVideoResult`, `BraveNewsResult`
+- [ ] Create `ImageResultCard.tsx`, `VideoResultCard.tsx`, `NewsResultCard.tsx`
+- [ ] `App.tsx`: separate result state per tab; `handleSearch` routes to correct endpoint by `activeTab`; tab change re-runs search when in results view
+- [ ] `ResultsList.tsx`: accept `activeTab` prop; render correct card type per tab
+
+### Phase 9 — Pagination
+
+- [ ] `App.tsx`: add `currentPage` state; compute `offset = (page-1)*10` for Brave; reset page on new query
+- [ ] `ResultsList.tsx`: convert static `<span>` buttons to functional `<button>`; highlight current page; scroll to top on change
 | 2026-03-08 | Proxy Integration | Frontend now hashes query and sends hash to Cloudflare proxy endpoint; debug logging added for proxy response status/data |
 | 2026-03-08 | Current Limitation | Proxy currently forwards hash directly to Brave, so Brave returns hash-literal results; backend decryption/translation flow is in progress |
+| 2026-03-26 | Branch: non-encrypt-main | Stripped libsodium encryption — plain `q` param sent directly to `/api/brave`. `useSearch.ts` left syntactically broken (pre-existing issue on this branch, must fix on main before merge). |
+| 2026-03-26 | Phase 7 | Pre-work: fix broken useSearch.ts + useSearch.test.ts |
+| 2026-03-26 | Phase 7 | Location: append `near <city>` to query string; store lat/lng in state |
+| 2026-03-26 | Phase 8 | Images/Videos/News tabs: real Brave endpoints, new proxy routes, typed result cards |
+| 2026-03-26 | Phase 9 | Pagination: offset-based, functional page buttons |

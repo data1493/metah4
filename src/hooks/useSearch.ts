@@ -6,7 +6,21 @@ import type { SearchResult, BraveWebResult, BraveLocalResult, LogEntry } from '.
 // Domains that typically indicate local business listings
 const LOCAL_DOMAINS = ['yelp.com', 'yellowpages.com', 'tripadvisor.com', 'mapquest.com', 'bbb.org', 'nextdoor.com']
 
-export function useSearch(): UseSearchReturn {
+function extractDomain(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return url
+  }
+}
+
+function isLocalResult(url: string, localResults: BraveLocalResult[]): boolean {
+  const domain = extractDomain(url)
+  if (LOCAL_DOMAINS.some(d => domain.includes(d))) return true
+  return localResults.some(lr => lr.url === url)
+}
+
+interface UseSearchReturn {
   query: string
   setQuery: (q: string) => void
   results: SearchResult[]
@@ -20,24 +34,6 @@ export function useSearch(): UseSearchReturn {
 }
 
 export function useSearch(): UseSearchReturn {
-
-function extractDomain(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, '')
-  } catch {
-    return url
-  }
-}
-
-function isLocalResult(url: string, localResults: BraveLocalResult[]): boolean {
-  const domain = extractDomain(url)
-  // Check against known local listing domains
-  if (LOCAL_DOMAINS.some(d => domain.includes(d))) return true
-  // Check if URL matches any Brave local result
-  return localResults.some(lr => lr.url === url)
-}
-
-interface UseSearchReturn {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
@@ -69,7 +65,6 @@ interface UseSearchReturn {
         q: query.trim(),
         count: API.RESULTS_PER_PAGE,
       }
-      // Pass geolocation if available for local result boosting
       if (lat != null && lng != null) {
         params.result_filter = 'web'
       }
@@ -78,7 +73,7 @@ interface UseSearchReturn {
       const webResults: BraveWebResult[] = response.data?.web?.results ?? []
       const localResults: BraveLocalResult[] = response.data?.locations?.results ?? []
 
-      const mapped: SearchResult[] = webResults.map((r, i) => ({
+      const mapped: SearchResult[] = webResults.map(r => ({
         title: r.title,
         description: r.description ?? '',
         url: r.url,
@@ -87,7 +82,6 @@ interface UseSearchReturn {
         isLocal: isLocalResult(r.url, localResults),
       }))
 
-      // Boost local results to the top while preserving relative order
       const locals = mapped.filter(r => r.isLocal)
       const nonLocals = mapped.filter(r => !r.isLocal)
       setResults([...locals, ...nonLocals])

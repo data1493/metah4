@@ -18,13 +18,15 @@ Opens at http://localhost:5173
 	- `Decrypted query Brave saw:`
 - Badge indicates `encrypted on device + proxied anonymously`
 
-## 3. Current Known Behavior
+## 3. Current Known Behavior (non-encrypt-main branch)
 
-- Frontend encrypts query client-side with libsodium secretbox using a shared secret.
-- Frontend sends encrypted payload to Cloudflare proxy.
-- Proxy decrypts the query server-side and forwards to Brave.
-- Brave returns results for the original human query.
-- Provides true privacy: plain-text queries never leave the device.
+- Frontend sends plain `q` param directly to `/api/brave` (Vite proxy → Brave Search API).
+- No encryption — queries are sent in plaintext to Brave via the proxy.
+- Location: city name appended to query string (`near <city>`) when user enables location.
+- Images, Videos, News tabs call separate Brave endpoints (`/res/v1/images/search`, etc.).
+- Pagination uses Brave `offset` param.
+
+> **Encrypt version preserved on `encrypt-version` branch.** Merge strategy: `git checkout encrypt-version && git merge non-encrypt-main`.
 
 ## 4. Git Push After Changes
 
@@ -38,12 +40,10 @@ Never commit `.env` — it is gitignored.
 
 ## 5. End-to-End Search: Fully Working ✅
 
-- Frontend encrypts query with libsodium secretbox.
-- Vite dev proxy (`/api/chimp/search`) forwards to `https://api.chimpsheet.com/search`, resolving CORS in dev.
-- Cloudflare Worker decrypts the payload server-side using the shared secret.
-- Brave Search receives the original plain-text query and returns results.
-- Frontend maps and renders results correctly.
-- Confirmed working: `Decrypted query Brave saw: pizza` — 200 OK with full web/news/video payload.
+- Frontend sends `q=<query>` to `/api/brave` (Vite proxy).
+- Vite rewrites to `https://api.search.brave.com/res/v1/web/search` with `X-Subscription-Token` header.
+- Images/Videos/News use `/api/brave-images`, `/api/brave-videos`, `/api/brave-news` (separate proxy routes).
+- Brave returns results; frontend maps and renders.
 
 ## 6. Vite Config Notes
 

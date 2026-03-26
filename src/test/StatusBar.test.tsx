@@ -5,8 +5,6 @@ import StatusBar from '../components/StatusBar'
 
 describe('StatusBar', () => {
   const defaultProps = {
-    hashed: false,
-    hashValue: '',
     onShowProof: () => {},
     onShowLogs: () => {},
   }
@@ -17,15 +15,9 @@ describe('StatusBar', () => {
     expect(screen.getByText('View Logs')).toBeInTheDocument()
   })
 
-  it('does not show hash value when not hashed', () => {
+  it('does not show hash indicator', () => {
     render(<StatusBar {...defaultProps} />)
     expect(screen.queryByText('hashed on device')).not.toBeInTheDocument()
-  })
-
-  it('shows hash value when hashed', () => {
-    render(<StatusBar {...defaultProps} hashed={true} hashValue="abc123def456" />)
-    expect(screen.getByText('hashed on device')).toBeInTheDocument()
-    expect(screen.getByText('abc123def456')).toBeInTheDocument()
   })
 
   it('calls onShowProof when Privacy Proof is clicked', async () => {
