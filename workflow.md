@@ -49,3 +49,15 @@ Never commit `.env` — it is gitignored.
 
 - HMR explicitly configured (`ws://localhost:5173`) to prevent WebSocket connection failures in dev.
 - Proxy entries: `/api/brave` → Brave Search API (direct key usage), `/api/chimp` → Cloudflare Worker proxy.
+
+## 7. Location-Based Results
+
+Feature branch: `feature/location-search`
+
+- User opts in via a pill toggle near the search bar (neon-purple when active).
+- Clicking triggers the browser geolocation permission dialog.
+- On grant: country code is derived from `Intl.DateTimeFormat().resolvedOptions().timeZone` via `src/utils/timezoneToCountry.ts` — no coordinates leave the device.
+- `country=XX` is appended to the proxied Axios request when enabled.
+- Brave Search uses the `country` param to bias results regionally.
+- Toggle off clears country state; next search sends no `country` param.
+- `/api/chimp` proxy passes query params through automatically (plain path rewrite).
