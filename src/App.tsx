@@ -48,9 +48,11 @@ function App() {
     setLogs(prev => [...prev, ...newLogs])
 
     try {
-      const params: Record<string, string | number> = { q: query.trim(), count: 10 }
+      const effectiveQuery = locationEnabled && userCity
+        ? `${query.trim()} near ${userCity}`
+        : query.trim()
+      const params: Record<string, string | number> = { q: effectiveQuery, count: 10 }
       if (locationEnabled && userCountry) params.country = userCountry
-      if (locationEnabled && userCity) params.city = userCity
       const res = await axios.get('/api/brave', { params })
 
       if (res.data?.web?.results?.length > 0) {
