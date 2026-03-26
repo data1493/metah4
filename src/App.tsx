@@ -29,6 +29,7 @@ function App() {
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [viewMode, setViewMode] = useState<ViewMode>('home')
   const [activeTab, setActiveTab] = useState<SearchTab>('all')
+  const [currentPage, setCurrentPage] = useState(1)
   const [showProofModal, setShowProofModal] = useState(false)
   const [showLogsModal, setShowLogsModal] = useState(false)
   const [locationEnabled, setLocationEnabled] = useState(false)
@@ -38,7 +39,7 @@ function App() {
 
   useBodyScrollLock(showProofModal || showLogsModal)
 
-  const handleSearch = useCallback(async (tab: SearchTab = activeTab) => {
+  const handleSearch = useCallback(async (tab: SearchTab = activeTab, page: number = currentPage) => {
     if (!query.trim()) return
 
     setLoading(true)
@@ -48,7 +49,12 @@ function App() {
       ? `${query.trim()} near ${userCity}`
       : query.trim()
 
-    const baseParams: Record<string, string | number> = { q: effectiveQuery, count: API.RESULTS_PER_PAGE }
+    const offset = (page - 1) * API.RESULTS_PER_PAGE
+    const baseParams: Record<string, string | number> = {
+      q: effectiveQuery,
+      count: API.RESULTS_PER_PAGE,
+      offset,
+    }
     if (locationEnabled && userCountry) baseParams.country = userCountry
 
     const newLogs: LogEntry[] = [
@@ -101,16 +107,22 @@ function App() {
       setLoading(false)
       setViewMode('results')
     }
-  }, [query, activeTab, locationEnabled, userCountry, userCity, results.length])
+  }, [query, activeTab, currentPage, locationEnabled, userCountry, userCity, results.length])
 
   const handleTabChange = useCallback((tab: SearchTab) => {
     setActiveTab(tab)
+    setCurrentPage(1)
     setError('')
-    // Re-run search for new tab if we're already showing results and have a query
     if (viewMode === 'results' && query.trim()) {
-      handleSearch(tab)
+      handleSearch(tab, 1)
     }
   }, [viewMode, query, handleSearch])
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    handleSearch(activeTab, page)
+  }, [activeTab, handleSearch])
 
   const resetSearch = useCallback(() => {
     setQuery('')
@@ -120,6 +132,7 @@ function App() {
     setNewsResults([])
     setError('')
     setLogs([])
+    setCurrentPage(1)
   }, [])
 
   const handleGoHome = useCallback(() => {
@@ -231,6 +244,8 @@ function App() {
               newsResults={newsResults}
               loading={loading}
               error={error}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
             />
           </main>
         </>

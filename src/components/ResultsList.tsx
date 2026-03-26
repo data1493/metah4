@@ -14,9 +14,11 @@ interface ResultsListProps {
   newsResults: BraveNewsResult[]
   loading: boolean
   error: string
+  currentPage: number
+  onPageChange: (page: number) => void
 }
 
-const ResultsList = memo(function ResultsList({ activeTab, results, imageResults, videoResults, newsResults, loading, error }: ResultsListProps) {
+const ResultsList = memo(function ResultsList({ activeTab, results, imageResults, videoResults, newsResults, loading, error, currentPage, onPageChange }: ResultsListProps) {
   if (loading) {
     return (
       <div className="space-y-4" role="status" aria-live="polite" aria-label="Loading search results">
@@ -91,17 +93,19 @@ const ResultsList = memo(function ResultsList({ activeTab, results, imageResults
       <nav aria-label="Search result pages" className="flex items-center justify-center gap-2 mt-10 mb-8">
         <span className="text-neon-purple/60 text-sm mr-2">Page</span>
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((page) => (
-          <span
+          <button
             key={page}
-            aria-current={page === 1 ? 'page' : undefined}
-            className={`w-8 h-8 flex items-center justify-center rounded text-sm font-semibold ${
-              page === 1
+            onClick={() => onPageChange(page)}
+            aria-current={page === currentPage ? 'page' : undefined}
+            aria-label={`Page ${page}`}
+            className={`w-8 h-8 flex items-center justify-center rounded text-sm font-semibold transition-colors ${
+              page === currentPage
                 ? 'bg-neon-purple text-white'
-                : 'bg-card-bg border border-zinc-700 text-zinc-400'
+                : 'bg-card-bg border border-zinc-700 text-zinc-400 hover:border-neon-purple/50 hover:text-zinc-200'
             }`}
           >
             {page}
-          </span>
+          </button>
         ))}
       </nav>
     </>
