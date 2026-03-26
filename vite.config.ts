@@ -62,9 +62,6 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), tailwindcss(), saveColorsPlugin()],
-    optimizeDeps: {
-      exclude: ['libsodium-wrappers'],
-    },
     test: {
       globals: true,
       environment: 'jsdom',

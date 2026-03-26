@@ -8,8 +8,6 @@ interface HomePageProps {
   onQueryChange: (q: string) => void
   onSearch: () => void
   disabled: boolean
-  hashed: boolean
-  hashValue: string
   onShowProof: () => void
   locationEnabled: boolean
   locationLabel: string | null
@@ -17,7 +15,7 @@ interface HomePageProps {
   onToggleLocation: () => void
 }
 
-const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabled, hashed, hashValue, onShowProof, locationEnabled, locationLabel, locationError, onToggleLocation }: HomePageProps) {
+const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabled, onShowProof, locationEnabled, locationLabel, locationError, onToggleLocation }: HomePageProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
       <img
@@ -48,7 +46,7 @@ const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabl
       </div>
 
       <div className="mt-6">
-        <PrivacyBadge hashed={hashed} hashValue={hashValue} onClick={onShowProof} variant="home" />
+        <PrivacyBadge onClick={onShowProof} variant="home" />
       </div>
     </div>
   )

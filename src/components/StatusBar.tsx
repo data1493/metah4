@@ -1,13 +1,11 @@
 import { memo } from 'react'
 
 interface StatusBarProps {
-  hashed: boolean
-  hashValue: string
   onShowProof: () => void
   onShowLogs: () => void
 }
 
-const StatusBar = memo(function StatusBar({ hashed, hashValue, onShowProof, onShowLogs }: StatusBarProps) {
+const StatusBar = memo(function StatusBar({ onShowProof, onShowLogs }: StatusBarProps) {
   return (
     <div className="flex items-center gap-4 mb-4" role="toolbar" aria-label="Privacy controls">
       <button
@@ -27,18 +25,6 @@ const StatusBar = memo(function StatusBar({ hashed, hashValue, onShowProof, onSh
         <span className="w-3 h-3 rounded-full bg-neon-gold animate-pulse" aria-hidden="true" />
         View Logs
       </button>
-
-      {hashed && (
-        <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neon-gold/10 border border-neon-gold text-neon-gold text-xs animate-pulse">
-            <span className="w-2 h-2 rounded-full bg-neon-gold inline-block" aria-hidden="true" />
-            hashed on device
-          </span>
-          <span className="text-neon-gold/60 text-xs font-mono break-all" aria-label={`Hash value: ${hashValue}`}>
-            {hashValue}
-          </span>
-        </div>
-      )}
     </div>
   )
 })

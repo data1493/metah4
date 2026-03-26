@@ -6,29 +6,20 @@ import type { SearchResult, BraveWebResult, BraveLocalResult, LogEntry } from '.
 // Domains that typically indicate local business listings
 const LOCAL_DOMAINS = ['yelp.com', 'yellowpages.com', 'tripadvisor.com', 'mapquest.com', 'bbb.org', 'nextdoor.com']
 
-export function hashQuery(q: string): Promise<string> {
-  const data = new TextEncoder().encode(q)
-  return crypto.subtle.digest('SHA-256', data).then(buffer =>
-    Array.from(new Uint8Array(buffer))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('')
-  )
-}
-
-interface UseSearchReturn {
+export function useSearch(): UseSearchReturn {
   query: string
   setQuery: (q: string) => void
   results: SearchResult[]
   loading: boolean
   error: string
-  hashed: boolean
-  hashValue: string
   apiKeyError: boolean
   logs: LogEntry[]
   search: (lat?: number | null, lng?: number | null) => Promise<void>
   clearLogs: () => void
   resetSearch: () => void
 }
+
+export function useSearch(): UseSearchReturn {
 
 function extractDomain(url: string): string {
   try {
@@ -46,13 +37,11 @@ function isLocalResult(url: string, localResults: BraveLocalResult[]): boolean {
   return localResults.some(lr => lr.url === url)
 }
 
-export function useSearch(): UseSearchReturn {
+interface UseSearchReturn {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [hashed, setHashed] = useState(false)
-  const [hashValue, setHashValue] = useState('')
   const [apiKeyError, setApiKeyError] = useState(false)
   const [logs, setLogs] = useState<LogEntry[]>([])
 
@@ -67,16 +56,8 @@ export function useSearch(): UseSearchReturn {
 
     const newLogs: LogEntry[] = [
       { timestamp: new Date(), message: `Query received: "${query.trim()}"` },
-      { timestamp: new Date(), message: 'Starting SHA-256 hash on device...' },
+      { timestamp: new Date(), message: 'Sending query to search API...' },
     ]
-
-    const hash = await hashQuery(query.trim())
-
-    newLogs.push({ timestamp: new Date(), message: `Hash completed: ${hash.slice(0, 16)}...` })
-    newLogs.push({ timestamp: new Date(), message: 'Sending hashed query to secure API...' })
-
-    setHashValue(hash)
-    setHashed(true)
     setLoading(true)
     setResults([])
     setError('')
@@ -101,7 +82,7 @@ export function useSearch(): UseSearchReturn {
         title: r.title,
         description: r.description ?? '',
         url: r.url,
-        hash: i === 0 ? hash : '',
+        hash: '',
         domain: extractDomain(r.url),
         isLocal: isLocalResult(r.url, localResults),
       }))
@@ -127,10 +108,8 @@ export function useSearch(): UseSearchReturn {
     setQuery('')
     setResults([])
     setError('')
-    setHashed(false)
-    setHashValue('')
     setLogs([])
   }, [])
 
-  return { query, setQuery, results, loading, error, hashed, hashValue, apiKeyError, logs, search, clearLogs, resetSearch }
+  return { query, setQuery, results, loading, error, apiKeyError, logs, search, clearLogs, resetSearch }
 }
