@@ -142,8 +142,8 @@ App.tsx  ─── viewMode: 'home' | 'results'
 
 ### Phase 9 — Pagination
 
-- [ ] `App.tsx`: add `currentPage` state; compute `offset = (page-1)*10` for Brave; reset page on new query
-- [ ] `ResultsList.tsx`: convert static `<span>` buttons to functional `<button>`; highlight current page; scroll to top on change
+- [x] `App.tsx`: add `currentPage` state; compute `offset = (page-1)*10` for Brave; reset page on new query
+- [x] `ResultsList.tsx`: convert static `<span>` buttons to functional `<button>`; highlight current page; scroll to top on change
 | 2026-03-08 | Proxy Integration | Frontend now hashes query and sends hash to Cloudflare proxy endpoint; debug logging added for proxy response status/data |
 | 2026-03-08 | Current Limitation | Proxy currently forwards hash directly to Brave, so Brave returns hash-literal results; backend decryption/translation flow is in progress |
 | 2026-03-26 | Branch: non-encrypt-main | Stripped libsodium encryption — plain `q` param sent directly to `/api/brave`. `useSearch.ts` left syntactically broken (pre-existing issue on this branch, must fix on main before merge). |
