@@ -36,6 +36,7 @@ function App() {
   const [showLogsModal, setShowLogsModal] = useState(false)
   const [locationEnabled, setLocationEnabled] = useState(false)
   const [userCountry, setUserCountry] = useState<string | null>(null)
+  const [userCity, setUserCity] = useState<string | null>(null)
   const [locationError, setLocationError] = useState('')
 
   useBodyScrollLock(showProofModal || showLogsModal)
@@ -83,6 +84,7 @@ function App() {
     try {
       const params: Record<string, string> = { q: encryptedBase64 }
       if (locationEnabled && userCountry) params.country = userCountry
+      if (locationEnabled && userCity) params.city = userCity
       const res = await axios.get(PROXY_URL, { params })
       console.log('Proxy status:', res.status, 'Data keys:', Object.keys(res.data || {}))
       console.log('Proxy URL called:', PROXY_URL, 'country:', userCountry ?? 'none')
@@ -133,7 +135,7 @@ function App() {
       setLoading(false)
       setViewMode('results')
     }
-  }, [query, locationEnabled, userCountry])
+  }, [query, locationEnabled, userCountry, userCity])
 
   const resetSearch = useCallback(() => {
     setQuery('')
@@ -165,6 +167,7 @@ function App() {
     if (locationEnabled) {
       setLocationEnabled(false)
       setUserCountry(null)
+      setUserCity(null)
       setLocationError('')
       return
     }
@@ -173,16 +176,26 @@ function App() {
       return
     }
     navigator.geolocation.getCurrentPosition(
-      () => {
+      async (position) => {
+        const { latitude, longitude } = position.coords
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
         const country = timezoneToCountry(tz)
-        if (country) {
-          setUserCountry(country)
-          setLocationEnabled(true)
-          setLocationError('')
-        } else {
-          setLocationError('Could not determine country from timezone')
+        setUserCountry(country)
+        try {
+          const geocodeRes = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&zoom=10`,
+            { headers: { 'Accept-Language': 'en' } }
+          )
+          const data = await geocodeRes.json()
+          const city = data.address?.city || data.address?.town || data.address?.county || null
+          const state = data.address?.state_code || data.address?.state || null
+          const cityLabel = [city, state].filter(Boolean).join(', ')
+          setUserCity(cityLabel || null)
+        } catch {
+          setUserCity(null)
         }
+        setLocationEnabled(true)
+        setLocationError('')
       },
       () => {
         setLocationError('Location permission denied')
@@ -205,7 +218,7 @@ function App() {
             hashValue={hashValue}
             onShowProof={handleShowProof}
             locationEnabled={locationEnabled}
-            userCountry={userCountry}
+            locationLabel={userCity ?? userCountry}
             locationError={locationError}
             onToggleLocation={handleToggleLocation}
           />
@@ -222,7 +235,7 @@ function App() {
             hashValue={hashValue}
             onShowProof={handleShowProof}
             locationEnabled={locationEnabled}
-            userCountry={userCountry}
+            locationLabel={userCity ?? userCountry}
             onToggleLocation={handleToggleLocation}
           />
           <SearchTabs activeTab={activeTab} onTabChange={setActiveTab} />
