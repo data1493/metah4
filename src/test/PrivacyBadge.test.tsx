@@ -11,7 +11,7 @@ describe('PrivacyBadge', () => {
 
   it('shows active state when hashed', () => {
     render(<PrivacyBadge hashed={true} onClick={() => {}} />)
-    expect(screen.getByText('hashed on device + proxied anonymously')).toBeInTheDocument()
+    expect(screen.getByText('encrypted on device + proxied anonymously')).toBeInTheDocument()
   })
 
   it('calls onClick when clicked', async () => {
