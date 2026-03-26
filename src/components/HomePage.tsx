@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import SearchBar from './SearchBar'
 import PrivacyBadge from './PrivacyBadge'
+import LocationToggle from './LocationToggle'
 
 interface HomePageProps {
   query: string
@@ -10,9 +11,13 @@ interface HomePageProps {
   hashed: boolean
   hashValue: string
   onShowProof: () => void
+  locationEnabled: boolean
+  userCountry: string | null
+  locationError: string
+  onToggleLocation: () => void
 }
 
-const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabled, hashed, hashValue, onShowProof }: HomePageProps) {
+const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabled, hashed, hashValue, onShowProof, locationEnabled, userCountry, locationError, onToggleLocation }: HomePageProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
       <img
@@ -32,6 +37,14 @@ const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabl
           disabled={disabled}
           variant="home"
         />
+        <div className="flex justify-end mt-2">
+          <LocationToggle
+            enabled={locationEnabled}
+            country={userCountry}
+            error={locationError}
+            onToggle={onToggleLocation}
+          />
+        </div>
       </div>
 
       <div className="mt-6">

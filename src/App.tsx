@@ -3,6 +3,7 @@ import axios from 'axios'
 import sodium from 'libsodium-wrappers'
 import { hashQuery } from './hooks/useSearch'
 import { useBodyScrollLock } from './hooks/useBodyScrollLock'
+import { timezoneToCountry } from './utils/timezoneToCountry'
 import type { SearchTab, SearchResult, LogEntry } from './types'
 import HomePage from './components/HomePage'
 import Header from './components/Header'
@@ -33,6 +34,9 @@ function App() {
   const [activeTab, setActiveTab] = useState<SearchTab>('all')
   const [showProofModal, setShowProofModal] = useState(false)
   const [showLogsModal, setShowLogsModal] = useState(false)
+  const [locationEnabled, setLocationEnabled] = useState(false)
+  const [userCountry, setUserCountry] = useState<string | null>(null)
+  const [locationError, setLocationError] = useState('')
 
   useBodyScrollLock(showProofModal || showLogsModal)
 
@@ -77,9 +81,11 @@ function App() {
     setLogs(prev => [...prev, ...newLogs])
 
     try {
-      const res = await axios.get(`${PROXY_URL}?q=${encodeURIComponent(encryptedBase64)}`)
+      const params: Record<string, string> = { q: encryptedBase64 }
+      if (locationEnabled && userCountry) params.country = userCountry
+      const res = await axios.get(PROXY_URL, { params })
       console.log('Proxy status:', res.status, 'Data keys:', Object.keys(res.data || {}))
-      console.log('Proxy URL called:', `${PROXY_URL}?q=${encodeURIComponent(encryptedBase64)}`)
+      console.log('Proxy URL called:', PROXY_URL, 'country:', userCountry ?? 'none')
       console.log('Response status:', res.status)
       console.log('Response data:', res.data)
       console.log('Response headers:', res.headers)
@@ -91,10 +97,12 @@ function App() {
       }
 
       if (res.status !== 200) {
-        setResults([{ error: 'Proxy decryption failed – wrong key?' }])
+        setResults([])
+        setError('Proxy decryption failed – wrong key?')
         setLogs(prev => [...prev, { timestamp: new Date(), message: 'Backend decryption failed' }])
       } else if (res.data?.type === 'search' && !res.data.web?.results) {
-        setResults([{ error: 'Decryption likely failed – globe navigational result' }])
+        setResults([])
+        setError('Decryption likely failed – globe navigational result')
         setLogs(prev => [...prev, { timestamp: new Date(), message: 'Decryption likely failed – globe navigational result' }])
       } else if (res.data?.web?.results?.length > 0) {
         const mapped: SearchResult[] = res.data.web.results.map((r: any) => ({
@@ -108,7 +116,8 @@ function App() {
         setResults(mapped)
         setLogs(prev => [...prev, { timestamp: new Date(), message: `Search results received — ${mapped.length} result(s)` }])
       } else if (res.status === 200 && !res.data?.web?.results) {
-        setResults([{ error: 'No results – decryption may have failed on proxy' }])
+        setResults([])
+        setError('No results – decryption may have failed on proxy')
         setLogs(prev => [...prev, { timestamp: new Date(), message: 'No results – decryption may have failed on proxy' }])
       } else {
         setResults([])
@@ -117,13 +126,14 @@ function App() {
       }
     } catch (err: any) {
       console.error('Full search error:', err.message, err.response?.data, err.response?.status)
-      setResults([{ error: `Proxy error: ${err.message} (status ${err.response?.status || 'unknown'})` }])
+      setResults([])
+      setError(`Proxy error: ${err.message} (status ${err.response?.status || 'unknown'})`)
       setLogs(prev => [...prev, { timestamp: new Date(), message: `Error: ${err?.message || 'Proxy / network error'}` }])
     } finally {
       setLoading(false)
       setViewMode('results')
     }
-  }, [query])
+  }, [query, locationEnabled, userCountry])
 
   const resetSearch = useCallback(() => {
     setQuery('')
@@ -151,6 +161,35 @@ function App() {
   const handleShowProof = useCallback(() => setShowProofModal(true), [])
   const handleCloseProof = useCallback(() => setShowProofModal(false), [])
 
+  const handleToggleLocation = useCallback(() => {
+    if (locationEnabled) {
+      setLocationEnabled(false)
+      setUserCountry(null)
+      setLocationError('')
+      return
+    }
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation not supported by this browser')
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+        const country = timezoneToCountry(tz)
+        if (country) {
+          setUserCountry(country)
+          setLocationEnabled(true)
+          setLocationError('')
+        } else {
+          setLocationError('Could not determine country from timezone')
+        }
+      },
+      () => {
+        setLocationError('Location permission denied')
+      }
+    )
+  }, [locationEnabled])
+
   return (
     <div className="min-h-screen bg-deep-black flex flex-col relative" style={{ overflowX: 'clip' }}>
       <BackgroundEffects variant={viewMode} />
@@ -165,6 +204,10 @@ function App() {
             hashed={hashed}
             hashValue={hashValue}
             onShowProof={handleShowProof}
+            locationEnabled={locationEnabled}
+            userCountry={userCountry}
+            locationError={locationError}
+            onToggleLocation={handleToggleLocation}
           />
         </main>
       ) : (
@@ -178,6 +221,9 @@ function App() {
             hashed={hashed}
             hashValue={hashValue}
             onShowProof={handleShowProof}
+            locationEnabled={locationEnabled}
+            userCountry={userCountry}
+            onToggleLocation={handleToggleLocation}
           />
           <SearchTabs activeTab={activeTab} onTabChange={setActiveTab} />
           <main className="flex-1 max-w-3xl mx-auto w-full px-4 pt-4 relative z-10 pb-16">
