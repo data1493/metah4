@@ -21,7 +21,8 @@ app.use('/api/chimp', premiumRouter)
 // ── Standard API proxies ─────────────────────────────────────────────────────
 
 // Brave web search
-app.use('/api/brave', createProxyMiddleware({
+app.use(createProxyMiddleware({
+  pathFilter: '/api/brave',
   target: 'https://api.search.brave.com',
   changeOrigin: true,
   pathRewrite: { '^/api/brave': '/res/v1/web/search' },
@@ -33,7 +34,8 @@ app.use('/api/brave', createProxyMiddleware({
 }))
 
 // Brave image search
-app.use('/api/brave-images', createProxyMiddleware({
+app.use(createProxyMiddleware({
+  pathFilter: '/api/brave-images',
   target: 'https://api.search.brave.com',
   changeOrigin: true,
   pathRewrite: { '^/api/brave-images': '/res/v1/images/search' },
@@ -45,7 +47,8 @@ app.use('/api/brave-images', createProxyMiddleware({
 }))
 
 // Brave video search
-app.use('/api/brave-videos', createProxyMiddleware({
+app.use(createProxyMiddleware({
+  pathFilter: '/api/brave-videos',
   target: 'https://api.search.brave.com',
   changeOrigin: true,
   pathRewrite: { '^/api/brave-videos': '/res/v1/videos/search' },
@@ -57,7 +60,8 @@ app.use('/api/brave-videos', createProxyMiddleware({
 }))
 
 // Brave news search
-app.use('/api/brave-news', createProxyMiddleware({
+app.use(createProxyMiddleware({
+  pathFilter: '/api/brave-news',
   target: 'https://api.search.brave.com',
   changeOrigin: true,
   pathRewrite: { '^/api/brave-news': '/res/v1/news/search' },
@@ -69,7 +73,8 @@ app.use('/api/brave-news', createProxyMiddleware({
 }))
 
 // Pexels image search
-app.use('/api/pexels', createProxyMiddleware({
+app.use(createProxyMiddleware({
+  pathFilter: '/api/pexels',
   target: 'https://api.pexels.com',
   changeOrigin: true,
   pathRewrite: { '^/api/pexels': '/v1/search' },
