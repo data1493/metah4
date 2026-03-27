@@ -1,4 +1,4 @@
-import { memo, useRef, useEffect } from 'react'
+import { memo, useRef, useEffect, useState } from 'react'
 import type { SearchResult, BraveImageResult, BraveVideoResult, BraveNewsResult, SearchTab } from '../types'
 import ResultCard from './ResultCard'
 import ImageResultCard from './ImageResultCard'
@@ -13,6 +13,7 @@ function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onL
   onLoadMoreImages: () => void
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null)
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
 
   useEffect(() => {
     if (!imageHasMore) return
@@ -26,15 +27,27 @@ function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onL
     return () => observer.disconnect()
   }, [imageHasMore, onLoadMoreImages])
 
+  // Reset selection when results change (new search)
+  useEffect(() => {
+    setSelectedIndex(null)
+  }, [imageResults.length === 0])
+
   if (imageResults.length === 0) {
     return <div className="text-center py-8 text-zinc-500 text-sm">No images found. Try another search.</div>
   }
 
   return (
     <div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3" role="list" aria-label="Image results">
+      <div className="columns-2 sm:columns-3 lg:columns-4 gap-3" role="list" aria-label="Image results">
         {imageResults.map((r, i) => (
-          <ImageResultCard key={`${r.url}-${i}`} result={r} index={i} />
+          <div key={`${r.url}-${i}`} className="break-inside-avoid mb-3">
+            <ImageResultCard
+              result={r}
+              index={i}
+              onSelect={() => setSelectedIndex(i)}
+              isSelected={i === selectedIndex}
+            />
+          </div>
         ))}
       </div>
       {imageLoadingMore && (

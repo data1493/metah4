@@ -25,8 +25,8 @@ export interface BraveImageResult {
   title: string
   url: string
   source: string
-  thumbnail: { src: string }
-  properties?: { url?: string }
+  thumbnail: { src: string; width?: number; height?: number }
+  properties?: { url?: string; width?: number; height?: number }
 }
 
 export interface BraveVideoResult {
