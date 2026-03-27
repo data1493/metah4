@@ -102,6 +102,22 @@ app.use(createProxyMiddleware({
   on: { error: (err, _req, res) => { res.status(502).json({ error: 'Pexels unavailable' }) } },
 }))
 
+// ── IP geolocation (city from user's real IP) ────────────────────────────────
+app.get('/api/geoip', async (req, res) => {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress
+  try {
+    const r = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,countryCode,city,regionName`)
+    const data = await r.json()
+    if (data.status === 'success') {
+      res.json({ city: data.city, region: data.regionName, country: data.countryCode })
+    } else {
+      res.json({ city: null, region: null, country: null })
+    }
+  } catch {
+    res.json({ city: null, region: null, country: null })
+  }
+})
+
 // ── Static frontend ──────────────────────────────────────────────────────────
 
 const distPath = path.resolve(__dirname, '../dist')

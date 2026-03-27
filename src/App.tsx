@@ -318,16 +318,21 @@ function App() {
         setLocationEnabled(true)
         setLocationError('')
       },
-      (err) => {
+      async (err) => {
         if (err.code === err.PERMISSION_DENIED || err.code === 1) {
-          const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-          const country = timezoneToCountry(tz)
-          if (country) {
-            setUserCountry(country)
-            setUserCity(null)
-            setLocationEnabled(true)
-            setLocationError('')
-          } else {
+          try {
+            const r = await fetch('/api/geoip')
+            const data = await r.json()
+            if (data.city) {
+              const cityLabel = [data.city, data.region].filter(Boolean).join(', ')
+              setUserCity(cityLabel)
+              setUserCountry(data.country)
+              setLocationEnabled(true)
+              setLocationError('')
+            } else {
+              setLocationError('Location unavailable')
+            }
+          } catch {
             setLocationError('Location unavailable')
           }
         } else {
