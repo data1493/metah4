@@ -22,7 +22,7 @@ app.use('/api/chimp', premiumRouter)
 
 // Brave web search
 app.use(createProxyMiddleware({
-  pathFilter: '/api/brave',
+  pathFilter: (path) => path.startsWith('/api/brave') && !path.startsWith('/api/brave-'),
   target: 'https://api.search.brave.com',
   changeOrigin: true,
   pathRewrite: { '^/api/brave': '/res/v1/web/search' },
