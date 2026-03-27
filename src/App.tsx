@@ -77,6 +77,7 @@ function App() {
         }))
         setResults(mapped)
         setLogs(prev => [...prev, { timestamp: new Date(), message: `${mapped.length} web result(s) received` }])
+        if (mapped.length === 0) setError('No results returned')
       } else if (tab === 'images') {
         setImageResults([])
         const res = await axios.get(API.BRAVE_IMAGES, { params: baseParams })
@@ -95,10 +96,6 @@ function App() {
         const news: BraveNewsResult[] = res.data?.results ?? []
         setNewsResults(news)
         setLogs(prev => [...prev, { timestamp: new Date(), message: `${news.length} news result(s) received` }])
-      }
-
-      if (tab === 'all' && results.length === 0) {
-        setError('No results returned')
       }
     } catch (err: any) {
       setError(`Search error: ${err.message}`)

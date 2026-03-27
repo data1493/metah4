@@ -75,15 +75,6 @@ export default defineConfig(({ mode }) => {
         port: 5173,
       },
       proxy: {
-        '/api/brave': {
-          target: 'https://api.search.brave.com',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/brave/, '/res/v1/web/search'),
-          headers: {
-            'X-Subscription-Token': env.VITE_BRAVE_SEARCH_API_KEY ?? '',
-            'Accept': 'application/json',
-          },
-        },
         '/api/brave-images': {
           target: 'https://api.search.brave.com',
           changeOrigin: true,
@@ -106,6 +97,15 @@ export default defineConfig(({ mode }) => {
           target: 'https://api.search.brave.com',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/brave-news/, '/res/v1/news/search'),
+          headers: {
+            'X-Subscription-Token': env.VITE_BRAVE_SEARCH_API_KEY ?? '',
+            'Accept': 'application/json',
+          },
+        },
+        '/api/brave': {
+          target: 'https://api.search.brave.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/brave/, '/res/v1/web/search'),
           headers: {
             'X-Subscription-Token': env.VITE_BRAVE_SEARCH_API_KEY ?? '',
             'Accept': 'application/json',
