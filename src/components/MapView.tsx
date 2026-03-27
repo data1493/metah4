@@ -30,6 +30,16 @@ function FlyTo({ lat, lon }: { lat: number; lon: number }) {
   return null
 }
 
+// Syncs map view to GPS position whenever coords change.
+// MapContainer ignores `center` prop changes after mount, so this is required.
+function GpsCenter({ lat, lon }: { lat: number; lon: number }) {
+  const map = useMap()
+  useEffect(() => {
+    map.setView([lat, lon], 13, { animate: true })
+  }, [lat, lon, map])
+  return null
+}
+
 interface MapViewProps {
   results: NominatimResult[]
   hasSearched: boolean
@@ -80,7 +90,12 @@ const MapView = memo(function MapView({ results: rawResults, hasSearched, userLa
             maxZoom={19}
           />
 
-          {/* Fly to selected result */}
+          {/* Keep map centered on GPS when no pin is selected */}
+          {hasGps && selectedIdx === null && (
+            <GpsCenter lat={userLat!} lon={userLon!} />
+          )}
+
+          {/* Fly to selected result pin */}
           {selectedIdx !== null && (
             <FlyTo
               lat={parseFloat(results[selectedIdx].lat)}
