@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef } from 'react'
 import axios from 'axios'
 import { useBodyScrollLock } from './hooks/useBodyScrollLock'
 import { timezoneToCountry } from './utils/timezoneToCountry'
+import { encryptQuery } from './utils/crypto'
 import { API } from './config'
 import type { SearchTab, SearchResult, BraveImageResult, BraveVideoResult, BraveNewsResult, LogEntry } from './types'
 import HomePage from './components/HomePage'
@@ -12,6 +13,7 @@ import Modal from './components/Modal'
 import PrivacyProofModalContent from './components/PrivacyProofModalContent'
 import ActivityLogsModalContent from './components/ActivityLogsModalContent'
 import BackgroundEffects from './components/BackgroundEffects'
+import PremiumBadge from './components/PremiumBadge'
 
 const DevColorPicker = import.meta.env.DEV
   ? React.lazy(() => import('./components/DevTools').then(m => ({ default: m.DevColorPicker })))
@@ -46,6 +48,7 @@ function App() {
   const [userCity, setUserCity] = useState<string | null>(null)
   const [locationError, setLocationError] = useState('')
   const [hasSearched, setHasSearched] = useState(false)
+  const [isPremium, setIsPremium] = useState(import.meta.env.VITE_PREMIUM_ENABLED === 'true')
   const lastSearchTimeRef = useRef<number>(0)
 
   // Restore state from URL on mount
@@ -94,6 +97,38 @@ function App() {
     setLogs(prev => [...prev, ...newLogs])
 
     try {
+      // Premium path: encrypt query and POST to server-side decryption endpoint
+      if (isPremium) {
+        const encrypted = await encryptQuery(effectiveQuery)
+        const body = {
+          ...encrypted,
+          tab,
+          count: API.RESULTS_PER_PAGE,
+          offset,
+          ...(locationEnabled && userCountry ? { country: userCountry } : {}),
+        }
+        const res = await axios.post('/api/chimp/search', body)
+        if (tab === 'all') {
+          const mapped: SearchResult[] = (res.data?.web?.results ?? []).map((r: any) => ({
+            title: r.title || 'No title',
+            description: r.description || 'No description',
+            url: r.url || '#',
+            hash: '',
+            domain: r.url ? new URL(r.url).hostname.replace(/^www\./, '') : '',
+            isLocal: false,
+          }))
+          setResults(mapped)
+          setLogs(prev => [...prev, { timestamp: new Date(), message: `[encrypted] ${mapped.length} web result(s) received` }])
+        } else if (tab === 'images') {
+          setImageResults(res.data?.results ?? [])
+        } else if (tab === 'videos') {
+          setVideoResults(res.data?.results ?? [])
+        } else if (tab === 'news') {
+          setNewsResults(res.data?.results ?? [])
+        }
+        return
+      }
+
       if (tab === 'all') {
         setResults([])
         const res = await axios.get(API.BRAVE_SEARCH, { params: baseParams })
@@ -322,8 +357,9 @@ function App() {
           />
           <SearchTabs activeTab={activeTab} onTabChange={handleTabChange} />
           <main className="flex-1 max-w-3xl mx-auto w-full px-4 pt-4 relative z-10 pb-16">
-            {/* Activity logs button */}
-            <div className="flex justify-end mb-3">
+            {/* Activity logs + premium toggle */}
+            <div className="flex items-center justify-between mb-3">
+              <PremiumBadge enabled={isPremium} onToggle={() => setIsPremium(p => !p)} />
               <button
                 onClick={handleShowLogs}
                 className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-full text-xs font-medium text-zinc-400 transition-all border border-zinc-700"

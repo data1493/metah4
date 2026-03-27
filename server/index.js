@@ -3,6 +3,7 @@ import express from 'express'
 import { createProxyMiddleware } from 'http-proxy-middleware'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import premiumRouter from './routes/premium.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -14,7 +15,10 @@ const PEXELS_KEY = process.env.PEXELS_API_KEY
 if (!BRAVE_KEY) console.warn('[server] WARNING: BRAVE_SEARCH_API_KEY not set — Brave searches will fail')
 if (!PEXELS_KEY) console.warn('[server] WARNING: PEXELS_API_KEY not set — Pexels image searches will fail')
 
-// ── API proxies ──────────────────────────────────────────────────────────────
+// ── Premium encrypted search endpoint ───────────────────────────────────────
+app.use('/api/chimp', premiumRouter)
+
+// ── Standard API proxies ─────────────────────────────────────────────────────
 
 // Brave web search
 app.use('/api/brave', createProxyMiddleware({

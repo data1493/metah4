@@ -62,6 +62,11 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), tailwindcss(), saveColorsPlugin()],
+    optimizeDeps: {
+      // libsodium attaches functions to its CJS export after WASM loads;
+      // esbuild pre-bundling snapshots the object before that happens — exclude to preserve the mutable reference
+      exclude: ['libsodium-wrappers'],
+    },
     test: {
       globals: true,
       environment: 'jsdom',

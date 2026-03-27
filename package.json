@@ -16,7 +16,9 @@
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/permanent-marker": "^5.2.7",
     "@tailwindcss/vite": "^4.2.1",
+    "@types/libsodium-wrappers": "^0.7.14",
     "axios": "^1.13.6",
+    "libsodium-wrappers": "^0.8.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwindcss": "^4.2.1"
