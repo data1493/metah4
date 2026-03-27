@@ -320,17 +320,7 @@ function App() {
       },
       (err) => {
         if (err.code === err.PERMISSION_DENIED || err.code === 1) {
-          // Geolocation blocked (HTTP or user denied) — fall back to timezone
-          const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-          const country = timezoneToCountry(tz)
-          if (country) {
-            setUserCountry(country)
-            setUserCity(null)
-            setLocationEnabled(true)
-            setLocationError('')
-          } else {
-            setLocationError('Location unavailable — enable HTTPS or grant permission')
-          }
+          setLocationError('Location requires HTTPS — update your browser to allow this site')
         } else {
           setLocationError('Location unavailable')
         }
