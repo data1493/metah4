@@ -361,6 +361,15 @@ function App() {
               const cityLabel = [data.city, data.region].filter(Boolean).join(', ')
               setUserCity(cityLabel)
               setUserCountry(data.country)
+              // Forward-geocode the city to get approximate lat/lon for map centering and viewbox
+              try {
+                const geoRes = await fetch(`/api/nominatim?q=${encodeURIComponent(cityLabel)}&format=json&limit=1`)
+                const geoData = await geoRes.json()
+                if (Array.isArray(geoData) && geoData[0]) {
+                  setUserLat(parseFloat(geoData[0].lat))
+                  setUserLon(parseFloat(geoData[0].lon))
+                }
+              } catch { /* silent — map will fall back to result[0] center */ }
               setLocationEnabled(true)
               setLocationError('')
               setLocationAutoEdit(true)
