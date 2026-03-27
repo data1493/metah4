@@ -372,6 +372,8 @@ function App() {
           <span className="text-zinc-500">Powered by Brave Search</span>
           <span className="text-zinc-700">·</span>
           <span className="text-zinc-500">Protected by NordVPN</span>
+          <span className="text-zinc-700">·</span>
+          <a href="/privacy.html" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-zinc-300 transition-colors">Privacy Policy</a>
         </div>
       </footer>
     </div>

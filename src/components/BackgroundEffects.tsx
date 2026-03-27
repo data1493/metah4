@@ -13,7 +13,7 @@ const BackgroundEffects = memo(function BackgroundEffects({ variant = 'home' }: 
       {variant === 'home' && (
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/images/bg1.JPG)' }}
+          style={{ backgroundImage: 'url(/images/bg1.webp)' }}
         >
           <div className="absolute inset-0 bg-deep-black/60" />
         </div>
