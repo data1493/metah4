@@ -20,6 +20,12 @@ app.use('/api/chimp', premiumRouter)
 
 // ── Standard API proxies ─────────────────────────────────────────────────────
 
+// Forward the real client IP to Brave so it geolocates the user, not the server
+const forwardClientIp = (proxyReq, req) => {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress
+  if (ip) proxyReq.setHeader('X-Forwarded-For', ip)
+}
+
 // Brave web search
 app.use(createProxyMiddleware({
   pathFilter: (path) => path.startsWith('/api/brave') && !path.startsWith('/api/brave-'),
@@ -30,7 +36,10 @@ app.use(createProxyMiddleware({
     'X-Subscription-Token': BRAVE_KEY ?? '',
     'Accept': 'application/json',
   },
-  on: { error: (err, _req, res) => { res.status(502).json({ error: 'Brave Search unavailable' }) } },
+  on: {
+    proxyReq: forwardClientIp,
+    error: (err, _req, res) => { res.status(502).json({ error: 'Brave Search unavailable' }) },
+  },
 }))
 
 // Brave image search
@@ -43,7 +52,10 @@ app.use(createProxyMiddleware({
     'X-Subscription-Token': BRAVE_KEY ?? '',
     'Accept': 'application/json',
   },
-  on: { error: (err, _req, res) => { res.status(502).json({ error: 'Brave Image Search unavailable' }) } },
+  on: {
+    proxyReq: forwardClientIp,
+    error: (err, _req, res) => { res.status(502).json({ error: 'Brave Image Search unavailable' }) },
+  },
 }))
 
 // Brave video search
@@ -56,7 +68,10 @@ app.use(createProxyMiddleware({
     'X-Subscription-Token': BRAVE_KEY ?? '',
     'Accept': 'application/json',
   },
-  on: { error: (err, _req, res) => { res.status(502).json({ error: 'Brave Video Search unavailable' }) } },
+  on: {
+    proxyReq: forwardClientIp,
+    error: (err, _req, res) => { res.status(502).json({ error: 'Brave Video Search unavailable' }) },
+  },
 }))
 
 // Brave news search
@@ -69,7 +84,10 @@ app.use(createProxyMiddleware({
     'X-Subscription-Token': BRAVE_KEY ?? '',
     'Accept': 'application/json',
   },
-  on: { error: (err, _req, res) => { res.status(502).json({ error: 'Brave News Search unavailable' }) } },
+  on: {
+    proxyReq: forwardClientIp,
+    error: (err, _req, res) => { res.status(502).json({ error: 'Brave News Search unavailable' }) },
+  },
 }))
 
 // Pexels image search
