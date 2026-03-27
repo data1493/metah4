@@ -11,6 +11,7 @@ const TABS: { id: SearchTab; label: string }[] = [
   { id: 'images', label: 'Images' },
   { id: 'videos', label: 'Videos' },
   { id: 'news', label: 'News' },
+  { id: 'maps', label: 'Maps' },
 ]
 
 const SearchTabs = memo(function SearchTabs({ activeTab, onTabChange }: SearchTabsProps) {

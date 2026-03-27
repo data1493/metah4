@@ -4,6 +4,7 @@ export const API = {
   BRAVE_VIDEOS: '/api/brave-videos',
   BRAVE_NEWS: '/api/brave-news',
   PEXELS: '/api/pexels',
+  NOMINATIM: '/api/nominatim',
   RESULTS_PER_PAGE: 20,
   IMAGES_COUNT: 20,
   PEXELS_PER_PAGE: 20,

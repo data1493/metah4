@@ -4,7 +4,7 @@ import { useBodyScrollLock } from './hooks/useBodyScrollLock'
 import { timezoneToCountry } from './utils/timezoneToCountry'
 import { encryptQuery } from './utils/crypto'
 import { API } from './config'
-import type { SearchTab, SearchResult, BraveImageResult, BraveVideoResult, BraveNewsResult, LogEntry } from './types'
+import type { SearchTab, SearchResult, BraveImageResult, BraveVideoResult, BraveNewsResult, NominatimResult, LogEntry } from './types'
 import HomePage from './components/HomePage'
 import Header from './components/Header'
 import SearchTabs from './components/SearchTabs'
@@ -35,6 +35,7 @@ function App() {
   const [imageLoadingMore, setImageLoadingMore] = useState(false)
   const [videoResults, setVideoResults] = useState<BraveVideoResult[]>([])
   const [newsResults, setNewsResults] = useState<BraveNewsResult[]>([])
+  const [mapResults, setMapResults] = useState<NominatimResult[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [logs, setLogs] = useState<LogEntry[]>([])
@@ -60,7 +61,7 @@ function App() {
     const page = parseInt(params.get('page') ?? '1', 10)
     if (q) {
       setQuery(q)
-      if (tab && ['all', 'images', 'videos', 'news'].includes(tab)) setActiveTab(tab)
+      if (tab && ['all', 'images', 'videos', 'news', 'maps'].includes(tab)) setActiveTab(tab)
       if (!isNaN(page) && page >= 1) setCurrentPage(page)
     }
   }, [])
@@ -185,6 +186,14 @@ function App() {
         const news: BraveNewsResult[] = res.data?.results ?? []
         setNewsResults(news)
         setLogs(prev => [...prev, { timestamp: new Date(), message: `${news.length} news result(s) received` }])
+      } else if (tab === 'maps') {
+        setMapResults([])
+        const res = await axios.get(API.NOMINATIM, {
+          params: { q: effectiveQuery, format: 'json', limit: 20, addressdetails: 1 },
+        })
+        const places: NominatimResult[] = res.data ?? []
+        setMapResults(places)
+        setLogs(prev => [...prev, { timestamp: new Date(), message: `${places.length} map result(s) received` }])
       }
     } catch (err: any) {
       setError(`Search error: ${err.message}`)
@@ -256,6 +265,7 @@ function App() {
     setImageResults([])
     setVideoResults([])
     setNewsResults([])
+    setMapResults([])
     setError('')
     setLogs([])
     setCurrentPage(1)
@@ -400,6 +410,7 @@ function App() {
               imageResults={imageResults}
               videoResults={videoResults}
               newsResults={newsResults}
+              mapResults={mapResults}
               loading={loading}
               error={error}
               currentPage={currentPage}

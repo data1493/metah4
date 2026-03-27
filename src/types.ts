@@ -53,4 +53,22 @@ export interface LogEntry {
   message: string
 }
 
-export type SearchTab = 'all' | 'images' | 'videos' | 'news'
+export interface NominatimResult {
+  place_id: number
+  lat: string
+  lon: string
+  display_name: string
+  name: string
+  type: string
+  class: string
+  address?: {
+    road?: string
+    suburb?: string
+    city?: string
+    state?: string
+    postcode?: string
+    country?: string
+  }
+}
+
+export type SearchTab = 'all' | 'images' | 'videos' | 'news' | 'maps'

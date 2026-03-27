@@ -1,11 +1,13 @@
-import { memo, useRef, useEffect, useState } from 'react'
-import type { SearchResult, BraveImageResult, BraveVideoResult, BraveNewsResult, SearchTab } from '../types'
+import { memo, useRef, useEffect, useState, lazy, Suspense } from 'react'
+import type { SearchResult, BraveImageResult, BraveVideoResult, BraveNewsResult, NominatimResult, SearchTab } from '../types'
 import ResultCard from './ResultCard'
 import ImageResultCard from './ImageResultCard'
 import VideoResultCard from './VideoResultCard'
 import NewsResultCard from './NewsResultCard'
 import SkeletonCard from './SkeletonCard'
 import ImagePreviewPanel from './ImagePreviewPanel'
+
+const MapView = lazy(() => import('./MapView'))
 
 function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onLoadMoreImages, hasSearched }: {
   imageResults: BraveImageResult[]
@@ -116,6 +118,7 @@ interface ResultsListProps {
   imageResults: BraveImageResult[]
   videoResults: BraveVideoResult[]
   newsResults: BraveNewsResult[]
+  mapResults: NominatimResult[]
   loading: boolean
   error: string
   currentPage: number
@@ -126,7 +129,7 @@ interface ResultsListProps {
   hasSearched: boolean
 }
 
-const ResultsList = memo(function ResultsList({ activeTab, results, imageResults, videoResults, newsResults, loading, error, currentPage, onPageChange, imageLoadingMore, imageHasMore, onLoadMoreImages, hasSearched }: ResultsListProps) {
+const ResultsList = memo(function ResultsList({ activeTab, results, imageResults, videoResults, newsResults, mapResults, loading, error, currentPage, onPageChange, imageLoadingMore, imageHasMore, onLoadMoreImages, hasSearched }: ResultsListProps) {
   if (loading) {
     return (
       <div className="space-y-4" role="status" aria-live="polite" aria-label="Loading search results">
@@ -181,6 +184,14 @@ const ResultsList = memo(function ResultsList({ activeTab, results, imageResults
           <NewsResultCard key={`${r.url}-${i}`} result={r} index={i} />
         ))}
       </div>
+    )
+  }
+
+  if (activeTab === 'maps') {
+    return (
+      <Suspense fallback={<div className="text-center py-8 text-zinc-500 text-sm">Loading map...</div>}>
+        <MapView results={mapResults} hasSearched={hasSearched} />
+      </Suspense>
     )
   }
 

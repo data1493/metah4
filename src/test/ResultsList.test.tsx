@@ -13,6 +13,7 @@ const baseProps = {
   imageResults: [],
   videoResults: [],
   newsResults: [],
+  mapResults: [],
   loading: false,
   error: '',
   currentPage: 1,

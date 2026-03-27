@@ -102,6 +102,24 @@ app.use(createProxyMiddleware({
   on: { error: (err, _req, res) => { res.status(502).json({ error: 'Pexels unavailable' }) } },
 }))
 
+// Nominatim (OpenStreetMap) geocoding — server proxy to add required User-Agent
+app.get('/api/nominatim', async (req, res) => {
+  try {
+    const params = new URLSearchParams(req.query)
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
+      headers: {
+        'User-Agent': 'Metah4SearchEngine/1.0 (metah4.com)',
+        'Accept-Language': 'en',
+        'Accept': 'application/json',
+      },
+    })
+    const data = await r.json()
+    res.json(data)
+  } catch {
+    res.status(502).json([])
+  }
+})
+
 // ── IP geolocation (city from user's real IP) ────────────────────────────────
 app.get('/api/geoip', async (req, res) => {
   const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress
