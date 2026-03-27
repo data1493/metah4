@@ -116,10 +116,11 @@ App.tsx  ─── viewMode: 'home' | 'results'
 
 ---
 
-## ⚠️ Pre-broken on non-encrypt-main (fix on main before merge)
+## ~~⚠️ Pre-broken on non-encrypt-main~~ ✅ Resolved (2026-03-27)
 
-- `src/hooks/useSearch.ts` — syntax is malformed after encryption strip (interface body and function body were mismerged). File compiles but is invalid TypeScript.
-- `src/test/useSearch.test.ts` — imports `hashQuery` which no longer exists after the strip. Tests will fail.
+- `src/hooks/useSearch.ts` — deleted (was broken after encryption strip; inline logic in App.tsx replaced it)
+- `src/test/useSearch.test.ts` — deleted (referenced non-existent `hashQuery`)
+- `src/test/ResultsList.test.tsx` — fixed (missing required props added to `baseProps`)
 
 ---
 
@@ -153,67 +154,61 @@ App.tsx  ─── viewMode: 'home' | 'results'
 | 2026-03-26 | Phase 9 | Pagination: offset-based, functional page buttons |
 | 2026-03-26 | Bug fixes | Proxy route ordering (specific before catch-all); stale closure on empty results; MouseEvent leaking as tab param in onClick handlers; infinite image scroll dedup via ref-based guard |
 | 2026-03-26 | Phase 10 | Image dedup via URL Set ref; masonry CSS columns layout; slide-in preview panel |
+| 2026-03-27 | Launch Phase 1 | Production Express proxy server; DevTools tree-shaken; self-hosted fonts (@fontsource); DuckDuckGo favicons; Pexels attribution; ErrorBoundary; index.html metadata fixed |
+| 2026-03-27 | Launch Phase 2 | Dead code removed (6 files); internal docs gitignored; README rewritten; URL state; 800ms debounce; "no results before search" fix; useBodyScrollLock fix; vestigial prop removed |
+| 2026-03-27 | Launch Phase 3 | robots.txt + sitemap.xml; bg1.webp (62% smaller); privacy.html policy page |
+| 2026-03-27 | Launch Phase 4 | Encryption as premium feature: libsodium client-side encrypt, tweetnacl server-side decrypt, PremiumBadge toggle, isPremium state |
 
 ---
 
-## Launch Readiness Plan (2026-03-26)
+## Launch Readiness Plan (2026-03-26) ✅ COMPLETE
 
-All items below are automated — no new external accounts required. Implemented in 4 phases, each committed separately.
+All 4 phases implemented and committed on 2026-03-27.
 
-### Launch Phase 1 — Critical Blockers
+### Launch Phase 1 — Critical Blockers ✅
 
-| # | Item | File(s) |
-|---|------|---------|
-| 1.1 | **Production API proxy** — Express server in `server/` proxying `/api/*` to Brave/Pexels; keys in server env vars, never in client bundle | `server/index.js`, `server/package.json`, `ecosystem.config.js` |
-| 1.2 | **DevTools tree-shaking** — gate `DevColorPicker`/`DevFontWorkshop` behind `import.meta.env.DEV` | `src/App.tsx` |
-| 1.3 | **Self-host fonts** — download Inter, Permanent Marker, JetBrains Mono as WOFF2 → `public/fonts/`; replace Google Fonts `@import` | `src/index.css`, `public/fonts/` |
-| 1.4 | **Replace Google favicon API** → DuckDuckGo `icons.duckduckgo.com/ip3/{domain}.ico` with fallback | `src/components/ResultCard.tsx` |
-| 1.5 | **Pexels legal attribution** — "Photos provided by Pexels" link below image grid; photographer credit in preview panel | `src/components/ResultsList.tsx`, `src/components/ImagePreviewPanel.tsx` |
-| 1.6 | **Error boundary** — `ErrorBoundary.tsx` wrapping `<App />` in `main.tsx` | `src/components/ErrorBoundary.tsx`, `src/main.tsx` |
-| 1.7 | **Fix index.html** — real favicon (`logo2a.png`), title "Metah4 — Private Search", meta description, fix OG image (`logo.png` doesn't exist) | `index.html` |
+| # | Item | Status |
+|---|------|--------|
+| 1.1 | **Production API proxy** — Express server in `server/` proxying `/api/*` to Brave/Pexels; keys in server env vars, never in client bundle | ✅ `ebbae12` |
+| 1.2 | **DevTools tree-shaking** — gate `DevColorPicker`/`DevFontWorkshop` behind `import.meta.env.DEV` | ✅ `ebbae12` |
+| 1.3 | **Self-host fonts** — `@fontsource` packages (Inter, Permanent Marker, JetBrains Mono); replaced Google Fonts `@import` | ✅ `ebbae12` |
+| 1.4 | **Replace Google favicon API** → DuckDuckGo `icons.duckduckgo.com/ip3/{domain}.ico` with `onError` hide fallback | ✅ `ebbae12` |
+| 1.5 | **Pexels legal attribution** — "Photos provided by Pexels" link below image grid; pexels.com link in preview panel header | ✅ `ebbae12` |
+| 1.6 | **Error boundary** — `ErrorBoundary.tsx` wrapping `<App />` in `main.tsx` | ✅ `ebbae12` |
+| 1.7 | **Fix index.html** — real favicon (`logo2a.png`), title "Metah4 — Private Search", meta description, OG image fixed | ✅ `ebbae12` |
 
-Commit: `feat: phase 1 — production-ready blockers`
+### Launch Phase 2 — Should Fix ✅
 
-### Launch Phase 2 — Should Fix
+| # | Item | Status |
+|---|------|--------|
+| 2.1 | **Dead code removal** — deleted `useSearch.ts`, `useGeolocation.ts`, `StatusBar.tsx`, `Logo.tsx`, `App.css`, `StatusBar.test.tsx`; removed `imageOffsetRef` | ✅ `f9c50a5` |
+| 2.2 | **Gitignore internal docs** — `PROJECT.md`, `workflow.md`, `location-feature-plan.md` added to `.gitignore` | ✅ `f9c50a5` |
+| 2.3 | **Rewrite README** — accurate stack + deployment instructions for droplets | ✅ `f9c50a5` |
+| 2.4 | **URL state** — `?q=&tab=&page=` via `window.history.pushState`; restored from URL on mount | ✅ `f9c50a5` |
+| 2.5 | **Search debounce** — 800ms cooldown via `lastSearchTimeRef` | ✅ `f9c50a5` |
+| 2.6 | **Geolocation auto-fire** — resolved by deleting the unused `useGeolocation.ts` hook; App.tsx only fires on explicit user tap | ✅ `f9c50a5` |
+| 2.7 | **"No results" before search** — tabs show "Search to explore…" until `hasSearched` is true | ✅ `f9c50a5` |
+| 2.8 | **useBodyScrollLock fix** — `'unset'` → `''` | ✅ `f9c50a5` |
+| 2.9 | **Remove vestigial prop** — stripped unused `firstResult` from `PrivacyProofModalContent` | ✅ `f9c50a5` |
 
-| # | Item | File(s) |
-|---|------|---------|
-| 2.1 | **Dead code removal** — delete `useSearch.ts`, `useGeolocation.ts`, `StatusBar.tsx`, `Logo.tsx`, `App.css`; remove `imageOffsetRef` from App.tsx | various |
-| 2.2 | **Gitignore internal docs** — add `PROJECT.md`, `workflow.md`, `location-feature-plan.md` to `.gitignore` | `.gitignore` |
-| 2.3 | **Rewrite README** — accurate description of current non-encrypt branch + deployment instructions | `README.md` |
-| 2.4 | **URL state** — sync `?q=&tab=&page=` via `window.history.pushState`; read on mount for bookmarking/sharing | `src/App.tsx` |
-| 2.5 | **Search debounce** — 800ms cooldown via `useRef<number>` to prevent API spam | `src/App.tsx` |
-| 2.6 | **Fix geolocation auto-fire** — remove `useEffect` that fires permission dialog on mount | `src/hooks/useGeolocation.ts` |
-| 2.7 | **"No results" before search** — show nothing / "Search to explore" instead of "No X found" before first query | `src/components/ResultsList.tsx` |
-| 2.8 | **useBodyScrollLock fix** — `'unset'` → `''` (removes inline style, lets CSS cascade) | `src/hooks/useBodyScrollLock.ts` |
-| 2.9 | **Remove vestigial prop** — strip unused `firstResult` prop from `PrivacyProofModalContent` | `src/components/PrivacyProofModalContent.tsx`, `src/App.tsx` |
+### Launch Phase 3 — Polish ✅
 
-Commit: `fix: phase 2 — dead code, URL state, debounce, UX fixes`
+| # | Item | Status |
+|---|------|--------|
+| 3.1 | **robots.txt + sitemap.xml** | ✅ `a4352d7` |
+| 3.2 | **WebP background** — `bg1.JPG` → `bg1.webp` (335KB → 128KB, 62% smaller) | ✅ `a4352d7` |
+| 3.3 | **Privacy policy page** — `public/privacy.html`; linked from footer | ✅ `a4352d7` |
 
-### Launch Phase 3 — Polish
+### Launch Phase 4 — Encryption as Premium Feature ✅
 
-| # | Item | File(s) |
-|---|------|---------|
-| 3.1 | **robots.txt + sitemap.xml** | `public/robots.txt`, `public/sitemap.xml` |
-| 3.2 | **WebP background** — convert `bg1.JPG` → `bg1.webp` | `public/images/`, `src/components/BackgroundEffects.tsx` |
-| 3.3 | **Privacy policy page** — static `public/privacy.html`; link from footer | `public/privacy.html` |
+| File | Purpose | Status |
+|------|---------|--------|
+| `src/utils/crypto.ts` | `encryptQuery()` via libsodium secretbox (XSalsa20-Poly1305) | ✅ `1462bc9` |
+| `server/routes/premium.js` | POST `/api/chimp/search` — tweetnacl decrypt + Brave/Pexels forward | ✅ `1462bc9` |
+| `src/components/PremiumBadge.tsx` | Gold lock icon toggle (idle/encrypted states) | ✅ `1462bc9` |
+| `src/App.tsx` | `isPremium` state; encrypted search path when enabled; `VITE_PREMIUM_ENABLED` env flag | ✅ `1462bc9` |
 
-Commit: `chore: phase 3 — robots.txt, sitemap, WebP bg, privacy policy`
-
-### Launch Phase 4 — Encryption as Premium Feature
-
-Reintroduce libsodium as an opt-in premium mode (`VITE_PREMIUM_ENABLED=true` env flag). Free tier uses current plain-text proxy; paid tier adds client-side libsodium encryption + server-side decryption endpoint. The `isPremium` boolean is later driveable by a JWT from any payment provider.
-
-| File | Purpose |
-|------|---------|
-| `src/utils/crypto.ts` | libsodium encrypt/decrypt helpers |
-| `server/routes/premium.js` | `/api/chimp/*` endpoint: decrypt query, forward to Brave |
-| `src/components/PremiumBadge.tsx` | Premium lock icon badge |
-| `src/App.tsx` | `isPremium` state; route search through crypto path when enabled |
-
-Re-add `libsodium-wrappers` to `package.json` and `optimizeDeps.exclude` to `vite.config.ts`.
-
-Commit: `feat: phase 4 — encryption as premium feature`
+Free tier: plain-text proxy. Premium tier: client-side libsodium encrypt → `/api/chimp/search` → server-side decrypt → Brave. `isPremium` driveable by JWT from any payment provider in future.
 
 ---
 
