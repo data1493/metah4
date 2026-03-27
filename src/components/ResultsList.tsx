@@ -17,7 +17,7 @@ function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onL
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
 
   useEffect(() => {
-    if (!imageHasMore || imageLoadingMore) return
+    if (!imageHasMore) return
     const el = sentinelRef.current
     if (!el) return
     const observer = new IntersectionObserver(
@@ -26,7 +26,7 @@ function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onL
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [imageHasMore, imageLoadingMore, onLoadMoreImages])
+  }, [imageHasMore, onLoadMoreImages])
 
   // Reset selection on new search (when results cleared)
   useEffect(() => {
@@ -73,7 +73,7 @@ function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onL
             <div className="w-6 h-6 rounded-full border-2 border-neon-purple border-t-transparent animate-spin" aria-label="Loading more images" />
           </div>
         )}
-        {imageHasMore && !imageLoadingMore && (
+        {imageHasMore && (
           <div ref={sentinelRef} className="h-16" aria-hidden="true" />
         )}
         {!imageHasMore && (

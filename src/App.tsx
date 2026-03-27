@@ -152,7 +152,7 @@ function App() {
       const imgs: BraveImageResult[] = res.data?.results ?? []
       const fresh = imgs.filter(r => !imageSeenUrlsRef.current.has(r.url))
       fresh.forEach(r => imageSeenUrlsRef.current.add(r.url))
-      setImageResults(prev => [...prev, ...fresh])
+      if (fresh.length > 0) setImageResults(prev => [...prev, ...fresh])
       imageOffsetRef.current += imgs.length
       if (imgs.length < API.RESULTS_PER_PAGE) setImageHasMore(false)
       setLogs(prev => [...prev, { timestamp: new Date(), message: `+${fresh.length} more image(s) loaded` }])
