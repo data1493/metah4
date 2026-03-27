@@ -201,10 +201,9 @@ function App() {
           addressdetails: 1,
         }
         if (locationEnabled && userLat !== null && userLon !== null) {
-          // GPS available: use a ~50km viewbox and require bounded results
+          // GPS available: bias results toward user area (no bounded=1 so generic queries still get results)
           const delta = 0.45
           mapParams.viewbox = `${userLon - delta},${userLat - delta},${userLon + delta},${userLat + delta}`
-          mapParams.bounded = 1
         } else if (locationEnabled && userCountry) {
           // IP geo only: limit by country code
           mapParams.countrycodes = userCountry.toLowerCase()
@@ -227,7 +226,7 @@ function App() {
         `?q=${encodeURIComponent(query.trim())}&tab=${tab}&page=${page}`
       )
     }
-  }, [query, activeTab, currentPage, locationEnabled, userCountry, userCity, results.length])
+  }, [query, activeTab, currentPage, locationEnabled, userCountry, userCity, userLat, userLon, results.length])
 
   const handleTabChange = useCallback((tab: SearchTab) => {
     setActiveTab(tab)
@@ -434,6 +433,8 @@ function App() {
               videoResults={videoResults}
               newsResults={newsResults}
               mapResults={mapResults}
+              userLat={userLat}
+              userLon={userLon}
               loading={loading}
               error={error}
               currentPage={currentPage}

@@ -14,6 +14,8 @@ const baseProps = {
   videoResults: [],
   newsResults: [],
   mapResults: [],
+  userLat: null,
+  userLon: null,
   loading: false,
   error: '',
   currentPage: 1,

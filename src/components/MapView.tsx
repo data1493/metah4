@@ -1,11 +1,11 @@
 import { memo, useState, useEffect } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, CircleMarker, useMap } from 'react-leaflet'
 import type { NominatimResult } from '../types'
 import MapResultCard from './MapResultCard'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 
-// Fix default marker icons broken by webpack/vite bundling
+// Fix default marker icons broken by vite bundling
 delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -33,15 +33,20 @@ function FlyTo({ lat, lon }: { lat: number; lon: number }) {
 interface MapViewProps {
   results: NominatimResult[]
   hasSearched: boolean
+  userLat: number | null
+  userLon: number | null
 }
 
-const MapView = memo(function MapView({ results, hasSearched }: MapViewProps) {
+const MapView = memo(function MapView({ results: rawResults, hasSearched, userLat, userLon }: MapViewProps) {
+  const results = Array.isArray(rawResults) ? rawResults : []
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
 
-  // Reset selection when results change
-  useEffect(() => { setSelectedIdx(null) }, [results])
+  useEffect(() => { setSelectedIdx(null) }, [results.length])
 
-  if (results.length === 0) {
+  const hasGps = userLat !== null && userLon !== null
+
+  // No results and no GPS — show blank state
+  if (results.length === 0 && !hasGps) {
     return (
       <div className="text-center py-8 text-zinc-500 text-sm">
         {hasSearched ? 'No places found. Try a more specific search.' : 'Search to see map results.'}
@@ -49,17 +54,22 @@ const MapView = memo(function MapView({ results, hasSearched }: MapViewProps) {
     )
   }
 
-  const center: [number, number] = selectedIdx !== null
-    ? [parseFloat(results[selectedIdx].lat), parseFloat(results[selectedIdx].lon)]
+  // Center: GPS position takes priority over first result
+  const center: [number, number] = hasGps
+    ? [userLat!, userLon!]
     : [parseFloat(results[0].lat), parseFloat(results[0].lon)]
 
   return (
     <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
+      {results.length === 0 && hasGps && hasSearched && (
+        <p className="text-zinc-500 text-sm text-center lg:hidden">No places found nearby. Map shows your location.</p>
+      )}
+
       {/* Map */}
       <div className="w-full lg:flex-1 h-72 lg:h-[500px] rounded overflow-hidden border border-zinc-800">
         <MapContainer
           center={center}
-          zoom={12}
+          zoom={hasGps ? 13 : 12}
           style={{ height: '100%', width: '100%', background: '#111' }}
           scrollWheelZoom={true}
         >
@@ -69,12 +79,27 @@ const MapView = memo(function MapView({ results, hasSearched }: MapViewProps) {
             subdomains="abcd"
             maxZoom={19}
           />
+
+          {/* Fly to selected result */}
           {selectedIdx !== null && (
             <FlyTo
               lat={parseFloat(results[selectedIdx].lat)}
               lon={parseFloat(results[selectedIdx].lon)}
             />
           )}
+
+          {/* "You are here" marker */}
+          {hasGps && (
+            <CircleMarker
+              center={[userLat!, userLon!]}
+              radius={8}
+              pathOptions={{ color: '#d400ff', fillColor: '#d400ff', fillOpacity: 0.85, weight: 2 }}
+            >
+              <Popup>You are here</Popup>
+            </CircleMarker>
+          )}
+
+          {/* Result pins */}
           {results.map((r, i) => (
             <Marker
               key={r.place_id}
@@ -95,17 +120,23 @@ const MapView = memo(function MapView({ results, hasSearched }: MapViewProps) {
       </div>
 
       {/* Result list */}
-      <div className="lg:w-72 flex flex-col gap-2 overflow-y-auto max-h-72 lg:max-h-[500px] pr-1">
-        {results.map((r, i) => (
-          <MapResultCard
-            key={r.place_id}
-            result={r}
-            index={i}
-            isSelected={i === selectedIdx}
-            onSelect={() => setSelectedIdx(i === selectedIdx ? null : i)}
-          />
-        ))}
-      </div>
+      {results.length > 0 && (
+        <div className="lg:w-72 flex flex-col gap-2 overflow-y-auto max-h-72 lg:max-h-[500px] pr-1">
+          {results.map((r, i) => (
+            <MapResultCard
+              key={r.place_id}
+              result={r}
+              index={i}
+              isSelected={i === selectedIdx}
+              onSelect={() => setSelectedIdx(i === selectedIdx ? null : i)}
+            />
+          ))}
+        </div>
+      )}
+
+      {results.length === 0 && hasGps && hasSearched && (
+        <p className="text-zinc-500 text-sm text-center hidden lg:block self-center">No places found nearby.<br />Map shows your location.</p>
+      )}
     </div>
   )
 })
