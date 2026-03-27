@@ -102,6 +102,14 @@ export default defineConfig(({ mode }) => {
             'Accept': 'application/json',
           },
         },
+        '/api/pexels': {
+          target: 'https://api.pexels.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/pexels/, '/v1/search'),
+          headers: {
+            'Authorization': env.VITE_PEXELS_API_KEY ?? '',
+          },
+        },
         '/api/brave': {
           target: 'https://api.search.brave.com',
           changeOrigin: true,

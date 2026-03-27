@@ -3,8 +3,10 @@ export const API = {
   BRAVE_IMAGES: '/api/brave-images',
   BRAVE_VIDEOS: '/api/brave-videos',
   BRAVE_NEWS: '/api/brave-news',
+  PEXELS: '/api/pexels',
   RESULTS_PER_PAGE: 10,
   IMAGES_COUNT: 20,
+  PEXELS_PER_PAGE: 20,
 } as const
 
 export const THEME = {

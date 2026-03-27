@@ -25,6 +25,7 @@ function App() {
   const imageOffsetRef = useRef(0)
   const imageLoadingRef = useRef(false)
   const imageSeenUrlsRef = useRef<Set<string>>(new Set())
+  const pexelsPageRef = useRef(1)
   const [imageHasMore, setImageHasMore] = useState(true)
   const [imageLoadingMore, setImageLoadingMore] = useState(false)
   const [videoResults, setVideoResults] = useState<BraveVideoResult[]>([])
@@ -88,16 +89,31 @@ function App() {
         imageOffsetRef.current = 0
         imageLoadingRef.current = false
         imageSeenUrlsRef.current = new Set()
+        pexelsPageRef.current = 1
         setImageHasMore(true)
         setImageLoadingMore(false)
-        const res = await axios.get(API.BRAVE_IMAGES, { params: { ...baseParams, count: API.IMAGES_COUNT, offset: 0 } })
-        const imgs: BraveImageResult[] = res.data?.results ?? []
-        imgs.forEach(r => imageSeenUrlsRef.current.add(r.url))
-        setImageResults(imgs)
-        imageOffsetRef.current = imgs.length
-        // Brave image search ignores offset — pagination not supported on any plan
-        setImageHasMore(false)
-        setLogs(prev => [...prev, { timestamp: new Date(), message: `${imgs.length} image result(s) received` }])
+        const [braveRes, pexelsRes] = await Promise.allSettled([
+          axios.get(API.BRAVE_IMAGES, { params: { ...baseParams, count: API.IMAGES_COUNT, offset: 0 } }),
+          axios.get(API.PEXELS, { params: { query: effectiveQuery, per_page: API.PEXELS_PER_PAGE, page: 1 } }),
+        ])
+        const braveImgs: BraveImageResult[] = braveRes.status === 'fulfilled' ? (braveRes.value.data?.results ?? []) : []
+        const pexelsPhotos: any[] = pexelsRes.status === 'fulfilled' ? (pexelsRes.value.data?.photos ?? []) : []
+        const pexelsImgs: BraveImageResult[] = pexelsPhotos.map((p: any) => ({
+          title: p.alt || p.photographer || 'Photo',
+          url: p.url,
+          source: 'pexels.com',
+          thumbnail: { src: p.src.medium, width: p.width, height: p.height },
+          properties: { url: p.src.large2x, width: p.width, height: p.height },
+        }))
+        const merged = [...braveImgs, ...pexelsImgs]
+        merged.forEach(r => imageSeenUrlsRef.current.add(r.url))
+        setImageResults(merged)
+        pexelsPageRef.current = 2
+        const pexelsTotalPages = pexelsRes.status === 'fulfilled'
+          ? Math.ceil((pexelsRes.value.data?.total_results ?? 0) / API.PEXELS_PER_PAGE)
+          : 0
+        setImageHasMore(pexelsTotalPages > 1)
+        setLogs(prev => [...prev, { timestamp: new Date(), message: `${merged.length} image result(s) received` }])
       } else if (tab === 'videos') {
         setVideoResults([])
         const res = await axios.get(API.BRAVE_VIDEOS, { params: baseParams })
@@ -142,23 +158,27 @@ function App() {
     const effectiveQuery = locationEnabled && userCity
       ? `${query.trim()} near ${userCity}`
       : query.trim()
-    const params: Record<string, string | number> = {
-      q: effectiveQuery,
-      count: API.IMAGES_COUNT,
-      offset: imageOffsetRef.current,
-    }
-    if (locationEnabled && userCountry) params.country = userCountry
     try {
-      const res = await axios.get(API.BRAVE_IMAGES, { params })
-      const imgs: BraveImageResult[] = res.data?.results ?? []
+      const res = await axios.get(API.PEXELS, {
+        params: { query: effectiveQuery, per_page: API.PEXELS_PER_PAGE, page: pexelsPageRef.current },
+      })
+      const photos: any[] = res.data?.photos ?? []
+      const imgs: BraveImageResult[] = photos.map((p: any) => ({
+        title: p.alt || p.photographer || 'Photo',
+        url: p.url,
+        source: 'pexels.com',
+        thumbnail: { src: p.src.medium, width: p.width, height: p.height },
+        properties: { url: p.src.large2x, width: p.width, height: p.height },
+      }))
       const fresh = imgs.filter(r => !imageSeenUrlsRef.current.has(r.url))
       fresh.forEach(r => imageSeenUrlsRef.current.add(r.url))
       if (fresh.length > 0) setImageResults(prev => [...prev, ...fresh])
-      imageOffsetRef.current += imgs.length
-      if (imgs.length < API.IMAGES_COUNT || fresh.length === 0) setImageHasMore(false)
+      pexelsPageRef.current += 1
+      const totalPages = Math.ceil((res.data?.total_results ?? 0) / API.PEXELS_PER_PAGE)
+      if (pexelsPageRef.current > totalPages || fresh.length === 0) setImageHasMore(false)
       setLogs(prev => [...prev, { timestamp: new Date(), message: `+${fresh.length} more image(s) loaded` }])
     } catch {
-      // silent — don't overwrite main error state
+      // silent
     } finally {
       imageLoadingRef.current = false
       setImageLoadingMore(false)
@@ -177,6 +197,7 @@ function App() {
     imageOffsetRef.current = 0
     imageLoadingRef.current = false
     imageSeenUrlsRef.current = new Set()
+    pexelsPageRef.current = 1
     setImageHasMore(true)
     setImageLoadingMore(false)
   }, [])
