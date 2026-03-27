@@ -21,7 +21,9 @@ function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onL
     const el = sentinelRef.current
     if (!el) return
     const observer = new IntersectionObserver(
-      (entries) => { if (entries[0].isIntersecting) onLoadMoreImages() },
+      (entries) => {
+        if (entries[0].isIntersecting) onLoadMoreImages()
+      },
       { rootMargin: '400px' }
     )
     observer.observe(el)

@@ -154,7 +154,7 @@ function App() {
       fresh.forEach(r => imageSeenUrlsRef.current.add(r.url))
       if (fresh.length > 0) setImageResults(prev => [...prev, ...fresh])
       imageOffsetRef.current += imgs.length
-      if (imgs.length < API.RESULTS_PER_PAGE) setImageHasMore(false)
+      if (imgs.length < API.RESULTS_PER_PAGE || fresh.length === 0) setImageHasMore(false)
       setLogs(prev => [...prev, { timestamp: new Date(), message: `+${fresh.length} more image(s) loaded` }])
     } catch {
       // silent — don't overwrite main error state
