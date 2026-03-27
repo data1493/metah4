@@ -13,9 +13,10 @@ interface HeaderProps {
   locationEnabled: boolean
   locationLabel: string | null
   onToggleLocation: () => void
+  onCityEdit: (city: string) => void
 }
 
-const Header = memo(function Header({ query, onQueryChange, onSearch, disabled, onLogoClick, onShowProof, locationEnabled, locationLabel, onToggleLocation }: HeaderProps) {
+const Header = memo(function Header({ query, onQueryChange, onSearch, disabled, onLogoClick, onShowProof, locationEnabled, locationLabel, onToggleLocation, onCityEdit }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 bg-deep-black/90 backdrop-blur-md border-b border-zinc-800">
       <div className="max-w-5xl mx-auto flex items-center gap-4 px-4 py-2">
@@ -45,6 +46,7 @@ const Header = memo(function Header({ query, onQueryChange, onSearch, disabled, 
             label={locationLabel}
             error=""
             onToggle={onToggleLocation}
+            onCityEdit={onCityEdit}
           />
           <PrivacyBadge onClick={onShowProof} variant="header" />
         </div>

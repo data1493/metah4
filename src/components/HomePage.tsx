@@ -13,9 +13,10 @@ interface HomePageProps {
   locationLabel: string | null
   locationError: string
   onToggleLocation: () => void
+  onCityEdit: (city: string) => void
 }
 
-const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabled, onShowProof, locationEnabled, locationLabel, locationError, onToggleLocation }: HomePageProps) {
+const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabled, onShowProof, locationEnabled, locationLabel, locationError, onToggleLocation, onCityEdit }: HomePageProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
       <img
@@ -41,6 +42,7 @@ const HomePage = memo(function HomePage({ query, onQueryChange, onSearch, disabl
             label={locationLabel}
             error={locationError}
             onToggle={onToggleLocation}
+            onCityEdit={onCityEdit}
           />
         </div>
       </div>

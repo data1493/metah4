@@ -358,6 +358,7 @@ function App() {
             locationLabel={userCity ?? userCountry}
             locationError={locationError}
             onToggleLocation={handleToggleLocation}
+            onCityEdit={(city) => setUserCity(city)}
           />
         </main>
       ) : (
@@ -372,6 +373,7 @@ function App() {
             locationEnabled={locationEnabled}
             locationLabel={userCity ?? userCountry}
             onToggleLocation={handleToggleLocation}
+            onCityEdit={(city) => setUserCity(city)}
           />
           <SearchTabs activeTab={activeTab} onTabChange={handleTabChange} />
           <main className="flex-1 max-w-3xl mx-auto w-full px-4 pt-4 relative z-10 pb-16">
