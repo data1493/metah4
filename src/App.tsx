@@ -95,7 +95,7 @@ function App() {
         imgs.forEach(r => imageSeenUrlsRef.current.add(r.url))
         setImageResults(imgs)
         imageOffsetRef.current = imgs.length
-        // Brave free tier ignores offset — pagination not supported
+        // Brave image search ignores offset — pagination not supported on any plan
         setImageHasMore(false)
         setLogs(prev => [...prev, { timestamp: new Date(), message: `${imgs.length} image result(s) received` }])
       } else if (tab === 'videos') {
