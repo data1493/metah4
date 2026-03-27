@@ -305,11 +305,11 @@ function App() {
         setUserCountry(country)
         try {
           const geocodeRes = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&zoom=10`,
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&zoom=13`,
             { headers: { 'Accept-Language': 'en' } }
           )
           const data = await geocodeRes.json()
-          const city = data.address?.city || data.address?.town || data.address?.county || null
+          const city = data.address?.city || data.address?.town || data.address?.suburb || data.address?.village || data.address?.county || null
           const state = data.address?.state_code || data.address?.state || null
           const cityLabel = [city, state].filter(Boolean).join(', ')
           setUserCity(cityLabel || null)
