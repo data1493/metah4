@@ -311,6 +311,20 @@ function App() {
     window.history.pushState({}, '', '/')
   }, [resetSearch])
 
+  const handleCityEdit = useCallback(async (city: string) => {
+    setUserCity(city)
+    setLocationAutoEdit(false)
+    // Re-geocode the corrected city so the map centers on the right place
+    try {
+      const res = await fetch(`/api/nominatim?q=${encodeURIComponent(city)}&format=json&limit=1`)
+      const data = await res.json()
+      if (Array.isArray(data) && data[0]) {
+        setUserLat(parseFloat(data[0].lat))
+        setUserLon(parseFloat(data[0].lon))
+      }
+    } catch { /* keep existing coords */ }
+  }, [])
+
   const handleShowLogs = useCallback(() => setShowLogsModal(true), [])
   const handleCloseLogs = useCallback(() => setShowLogsModal(false), [])
   const handleNukeLogs = useCallback(() => {
@@ -418,7 +432,7 @@ function App() {
             locationError={locationError}
             onToggleLocation={handleToggleLocation}
             autoEdit={locationAutoEdit}
-            onCityEdit={(city) => { setUserCity(city); setLocationAutoEdit(false) }}
+            onCityEdit={handleCityEdit}
           />
         </main>
       ) : (
@@ -434,7 +448,7 @@ function App() {
             locationLabel={userCity ?? userCountry}
             onToggleLocation={handleToggleLocation}
             autoEdit={locationAutoEdit}
-            onCityEdit={(city) => { setUserCity(city); setLocationAutoEdit(false) }}
+            onCityEdit={handleCityEdit}
           />
           <SearchTabs activeTab={activeTab} onTabChange={handleTabChange} />
           <main className="flex-1 max-w-3xl mx-auto w-full px-4 pt-4 relative z-10 pb-16">
