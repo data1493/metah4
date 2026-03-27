@@ -4,6 +4,7 @@ export const API = {
   BRAVE_VIDEOS: '/api/brave-videos',
   BRAVE_NEWS: '/api/brave-news',
   RESULTS_PER_PAGE: 10,
+  IMAGES_COUNT: 20,
 } as const
 
 export const THEME = {

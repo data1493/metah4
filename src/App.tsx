@@ -90,12 +90,13 @@ function App() {
         imageSeenUrlsRef.current = new Set()
         setImageHasMore(true)
         setImageLoadingMore(false)
-        const res = await axios.get(API.BRAVE_IMAGES, { params: { ...baseParams, offset: 0 } })
+        const res = await axios.get(API.BRAVE_IMAGES, { params: { ...baseParams, count: API.IMAGES_COUNT, offset: 0 } })
         const imgs: BraveImageResult[] = res.data?.results ?? []
         imgs.forEach(r => imageSeenUrlsRef.current.add(r.url))
         setImageResults(imgs)
         imageOffsetRef.current = imgs.length
-        if (imgs.length < API.RESULTS_PER_PAGE) setImageHasMore(false)
+        // Brave free tier ignores offset — pagination not supported
+        setImageHasMore(false)
         setLogs(prev => [...prev, { timestamp: new Date(), message: `${imgs.length} image result(s) received` }])
       } else if (tab === 'videos') {
         setVideoResults([])
@@ -143,7 +144,7 @@ function App() {
       : query.trim()
     const params: Record<string, string | number> = {
       q: effectiveQuery,
-      count: API.RESULTS_PER_PAGE,
+      count: API.IMAGES_COUNT,
       offset: imageOffsetRef.current,
     }
     if (locationEnabled && userCountry) params.country = userCountry
@@ -154,7 +155,7 @@ function App() {
       fresh.forEach(r => imageSeenUrlsRef.current.add(r.url))
       if (fresh.length > 0) setImageResults(prev => [...prev, ...fresh])
       imageOffsetRef.current += imgs.length
-      if (imgs.length < API.RESULTS_PER_PAGE || fresh.length === 0) setImageHasMore(false)
+      if (imgs.length < API.IMAGES_COUNT || fresh.length === 0) setImageHasMore(false)
       setLogs(prev => [...prev, { timestamp: new Date(), message: `+${fresh.length} more image(s) loaded` }])
     } catch {
       // silent — don't overwrite main error state
