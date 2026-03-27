@@ -411,7 +411,7 @@ function App() {
           setLocationError('Location unavailable')
         }
       },
-      { timeout: 10000, enableHighAccuracy: false, maximumAge: 30000 }
+      { timeout: 30000, enableHighAccuracy: true, maximumAge: 0 }
     )
   }, [locationEnabled])
 
