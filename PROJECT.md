@@ -151,3 +151,22 @@ App.tsx  ─── viewMode: 'home' | 'results'
 | 2026-03-26 | Phase 7 | Location: append `near <city>` to query string; store lat/lng in state |
 | 2026-03-26 | Phase 8 | Images/Videos/News tabs: real Brave endpoints, new proxy routes, typed result cards |
 | 2026-03-26 | Phase 9 | Pagination: offset-based, functional page buttons |
+| 2026-03-26 | Bug fixes | Proxy route ordering (specific before catch-all); stale closure on empty results; MouseEvent leaking as tab param in onClick handlers; infinite image scroll dedup via ref-based guard |
+| 2026-03-26 | Phase 10 | Image dedup via URL Set ref; masonry CSS columns layout; slide-in preview panel |
+
+### Phase 10 — Image Search: Dedup + Masonry + Preview Panel
+
+#### Phase 10a — Deduplication
+- [ ] `App.tsx`: add `imageSeenUrlsRef = useRef<Set<string>>(new Set())`
+- [ ] `handleSearch` (images branch): clear set on new search; populate with initial batch URLs
+- [ ] `handleLoadMoreImages`: filter each batch through set before appending; add new URLs to set
+- [ ] `resetSearch`: clear the set
+
+#### Phase 10b — Masonry grid + type fix
+- [ ] `types.ts`: extend `BraveImageResult.thumbnail` and `properties` with optional `width`/`height`
+- [ ] `ImageResultCard.tsx`: rewrite — root is `<button>` calling `onSelect()`; drop `aspect-video`; use `style={{ aspectRatio: w/h }}` when dimensions present; add `isSelected` ring highlight
+- [ ] `ResultsList.tsx` (`ImageResultsSection`): switch to `columns-2 sm:columns-3 lg:columns-4`, cards get `break-inside-avoid mb-3`; add `selectedIndex` state; outer container `flex gap-4` when panel open
+
+#### Phase 10c — Side preview panel
+- [ ] Create `ImagePreviewPanel.tsx`: sticky `w-[360px]` on desktop, `fixed inset-0 z-50` on mobile; full-res image, title, source, Visit/View buttons, Prev/Next arrows, keyboard nav (Escape/←/→)
+- [ ] Wire into `ImageResultsSection`: render panel when `selectedIndex !== null`; `onNext` near end pre-triggers `onLoadMoreImages()`

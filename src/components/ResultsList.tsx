@@ -1,10 +1,56 @@
-import { memo } from 'react'
+import { memo, useRef, useEffect } from 'react'
 import type { SearchResult, BraveImageResult, BraveVideoResult, BraveNewsResult, SearchTab } from '../types'
 import ResultCard from './ResultCard'
 import ImageResultCard from './ImageResultCard'
 import VideoResultCard from './VideoResultCard'
 import NewsResultCard from './NewsResultCard'
 import SkeletonCard from './SkeletonCard'
+
+function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onLoadMoreImages }: {
+  imageResults: BraveImageResult[]
+  imageLoadingMore: boolean
+  imageHasMore: boolean
+  onLoadMoreImages: () => void
+}) {
+  const sentinelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!imageHasMore) return
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) onLoadMoreImages() },
+      { rootMargin: '400px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [imageHasMore, onLoadMoreImages])
+
+  if (imageResults.length === 0) {
+    return <div className="text-center py-8 text-zinc-500 text-sm">No images found. Try another search.</div>
+  }
+
+  return (
+    <div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3" role="list" aria-label="Image results">
+        {imageResults.map((r, i) => (
+          <ImageResultCard key={`${r.url}-${i}`} result={r} index={i} />
+        ))}
+      </div>
+      {imageLoadingMore && (
+        <div className="flex justify-center py-6">
+          <div className="w-6 h-6 rounded-full border-2 border-neon-purple border-t-transparent animate-spin" aria-label="Loading more images" />
+        </div>
+      )}
+      {imageHasMore && !imageLoadingMore && (
+        <div ref={sentinelRef} className="h-16" aria-hidden="true" />
+      )}
+      {!imageHasMore && (
+        <p className="text-center py-6 text-zinc-600 text-xs">All results loaded</p>
+      )}
+    </div>
+  )
+}
 
 interface ResultsListProps {
   activeTab: SearchTab
@@ -16,9 +62,12 @@ interface ResultsListProps {
   error: string
   currentPage: number
   onPageChange: (page: number) => void
+  imageLoadingMore: boolean
+  imageHasMore: boolean
+  onLoadMoreImages: () => void
 }
 
-const ResultsList = memo(function ResultsList({ activeTab, results, imageResults, videoResults, newsResults, loading, error, currentPage, onPageChange }: ResultsListProps) {
+const ResultsList = memo(function ResultsList({ activeTab, results, imageResults, videoResults, newsResults, loading, error, currentPage, onPageChange, imageLoadingMore, imageHasMore, onLoadMoreImages }: ResultsListProps) {
   if (loading) {
     return (
       <div className="space-y-4" role="status" aria-live="polite" aria-label="Loading search results">
@@ -39,15 +88,13 @@ const ResultsList = memo(function ResultsList({ activeTab, results, imageResults
   }
 
   if (activeTab === 'images') {
-    if (imageResults.length === 0) {
-      return <div className="text-center py-8 text-zinc-500 text-sm">No images found. Try another search.</div>
-    }
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3" role="list" aria-label="Image results">
-        {imageResults.map((r, i) => (
-          <ImageResultCard key={`${r.url}-${i}`} result={r} index={i} />
-        ))}
-      </div>
+      <ImageResultsSection
+        imageResults={imageResults}
+        imageLoadingMore={imageLoadingMore}
+        imageHasMore={imageHasMore}
+        onLoadMoreImages={onLoadMoreImages}
+      />
     )
   }
 

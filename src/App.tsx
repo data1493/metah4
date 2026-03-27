@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import axios from 'axios'
 import { useBodyScrollLock } from './hooks/useBodyScrollLock'
 import { timezoneToCountry } from './utils/timezoneToCountry'
@@ -22,6 +22,11 @@ function App() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [imageResults, setImageResults] = useState<BraveImageResult[]>([])
+  const imageOffsetRef = useRef(0)
+  const imageLoadingRef = useRef(false)
+  const imageSeenUrlsRef = useRef<Set<string>>(new Set())
+  const [imageHasMore, setImageHasMore] = useState(true)
+  const [imageLoadingMore, setImageLoadingMore] = useState(false)
   const [videoResults, setVideoResults] = useState<BraveVideoResult[]>([])
   const [newsResults, setNewsResults] = useState<BraveNewsResult[]>([])
   const [loading, setLoading] = useState(false)
@@ -80,9 +85,17 @@ function App() {
         if (mapped.length === 0) setError('No results returned')
       } else if (tab === 'images') {
         setImageResults([])
-        const res = await axios.get(API.BRAVE_IMAGES, { params: baseParams })
+        imageOffsetRef.current = 0
+        imageLoadingRef.current = false
+        imageSeenUrlsRef.current = new Set()
+        setImageHasMore(true)
+        setImageLoadingMore(false)
+        const res = await axios.get(API.BRAVE_IMAGES, { params: { ...baseParams, offset: 0 } })
         const imgs: BraveImageResult[] = res.data?.results ?? []
+        imgs.forEach(r => imageSeenUrlsRef.current.add(r.url))
         setImageResults(imgs)
+        imageOffsetRef.current = imgs.length
+        if (imgs.length < API.RESULTS_PER_PAGE) setImageHasMore(false)
         setLogs(prev => [...prev, { timestamp: new Date(), message: `${imgs.length} image result(s) received` }])
       } else if (tab === 'videos') {
         setVideoResults([])
@@ -121,6 +134,36 @@ function App() {
     handleSearch(activeTab, page)
   }, [activeTab, handleSearch])
 
+  const handleLoadMoreImages = useCallback(async () => {
+    if (imageLoadingRef.current || !imageHasMore || !query.trim()) return
+    imageLoadingRef.current = true
+    setImageLoadingMore(true)
+    const effectiveQuery = locationEnabled && userCity
+      ? `${query.trim()} near ${userCity}`
+      : query.trim()
+    const params: Record<string, string | number> = {
+      q: effectiveQuery,
+      count: API.RESULTS_PER_PAGE,
+      offset: imageOffsetRef.current,
+    }
+    if (locationEnabled && userCountry) params.country = userCountry
+    try {
+      const res = await axios.get(API.BRAVE_IMAGES, { params })
+      const imgs: BraveImageResult[] = res.data?.results ?? []
+      const fresh = imgs.filter(r => !imageSeenUrlsRef.current.has(r.url))
+      fresh.forEach(r => imageSeenUrlsRef.current.add(r.url))
+      setImageResults(prev => [...prev, ...fresh])
+      imageOffsetRef.current += imgs.length
+      if (imgs.length < API.RESULTS_PER_PAGE) setImageHasMore(false)
+      setLogs(prev => [...prev, { timestamp: new Date(), message: `+${fresh.length} more image(s) loaded` }])
+    } catch {
+      // silent — don't overwrite main error state
+    } finally {
+      imageLoadingRef.current = false
+      setImageLoadingMore(false)
+    }
+  }, [imageHasMore, query, locationEnabled, userCountry, userCity])
+
   const resetSearch = useCallback(() => {
     setQuery('')
     setResults([])
@@ -130,6 +173,11 @@ function App() {
     setError('')
     setLogs([])
     setCurrentPage(1)
+    imageOffsetRef.current = 0
+    imageLoadingRef.current = false
+    imageSeenUrlsRef.current = new Set()
+    setImageHasMore(true)
+    setImageLoadingMore(false)
   }, [])
 
   const handleGoHome = useCallback(() => {
@@ -243,6 +291,9 @@ function App() {
               error={error}
               currentPage={currentPage}
               onPageChange={handlePageChange}
+              imageLoadingMore={imageLoadingMore}
+              imageHasMore={imageHasMore}
+              onLoadMoreImages={handleLoadMoreImages}
             />
           </main>
         </>
