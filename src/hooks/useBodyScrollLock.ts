@@ -2,9 +2,9 @@ import { useEffect } from 'react'
 
 export function useBodyScrollLock(locked: boolean) {
   useEffect(() => {
-    document.body.style.overflow = locked ? 'hidden' : 'unset'
+    document.body.style.overflow = locked ? 'hidden' : ''
     return () => {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = ''
     }
   }, [locked])
 }

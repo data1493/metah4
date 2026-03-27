@@ -1,63 +1,84 @@
-# METAH4
+# Metah4
 
-Privacy-focused search prototype with a hip-hop nostalgic UI. Queries are SHA-256 hashed on-device, then sent through a Cloudflare proxy. Built with React + Vite + TypeScript + Tailwind v4.
+Privacy-first meta search engine with a 90s hip-hop aesthetic. Queries route through a server-side proxy — your API keys never touch the client bundle, and no search data is stored or logged.
 
 ## Stack
 
-- React 19 + TypeScript
-- Vite 7 with `@tailwindcss/vite` (Tailwind v4)
-- libsodium-wrappers — client-side SHA-256 hashing
-- Axios — HTTP client
-- Cloudflare Worker proxy — frontend -> proxy search transport
-- Brave Search API — upstream search provider behind the proxy
+- **React 19** + TypeScript
+- **Vite 7** with `@tailwindcss/vite` (Tailwind v4)
+- **Axios** — HTTP client
+- **@fontsource** — self-hosted fonts (no Google Fonts tracking)
+- **Brave Search API** — upstream search provider
+- **Pexels API** — image search
+- **Express proxy server** — production API gateway (keys stay server-side)
 
 ## Design
 
-Lakers-themed aesthetic: deep black background (`#0a0a0a`), Lakers purple (`#542583`), Lakers gold (`#FDB927`). Rubik (display) + JetBrains Mono fonts. Glitch animations. Cassette-card result layout.
+90s Golden Era hip-hop aesthetic: deep black background, neon accents (green, purple, gold). Inter + JetBrains Mono + Permanent Marker fonts. Glitch animations, vinyl record and boombox SVGs, cassette-style result cards.
 
-## Current Search Flow
+## Search Features
 
-Metah4 routes search through a Cloudflare Worker proxy (`https://api.chimpsheet.com/search`). In dev, requests go through the Vite proxy at `/api/chimp/search` to avoid CORS.
+- Web, Images, Videos, News tabs (all powered by Brave Search)
+- Image results merged from Brave + Pexels with infinite scroll
+- City/region-level local search via browser geolocation (Nominatim reverse geocoding — lat/lng never sent to backend)
+- Activity logs with nuclear clear animation
+- Privacy badge with proof modal
 
-1. Frontend encrypts the raw query client-side using libsodium secretbox with a shared secret.
-2. Frontend sends the encrypted payload (nonce + ciphertext) to `/api/chimp/search` (Vite proxies to the Cloudflare Worker).
-3. Proxy decrypts the query server-side using the same shared secret.
-4. Proxy forwards the decrypted query to Brave Search.
-5. Brave returns results for the original query.
-
-This provides true privacy: plain-text queries never leave the user's device or reach external servers. End-to-end encryption and search is fully verified working.
-
-### Setup
-
-1. Ensure the Cloudflare proxy is deployed and reachable.
-2. Optional for local backend testing: create `.env` at the project root:
-
-```
-VITE_BRAVE_SEARCH_API_KEY=your_key_here
-```
-
-3. Run the dev server:
+## Setup (Development)
 
 ```bash
 npm install
-npm run dev
 ```
 
-The `VITE_` prefix is required for Vite to expose variables to the browser bundle.
-
-### Client-side Encryption Badge
-
-Every search triggers client-side encryption of the query using libsodium secretbox before the network request is made. The badge indicates:
-
-`encrypted on device + proxied anonymously`
-
-This confirms local encryption and anonymous proxy routing, providing meaningful private search semantics.
-
-## Dev
+Create `.env` at the project root:
+```
+VITE_BRAVE_SEARCH_API_KEY=your_brave_key_here
+VITE_PEXELS_API_KEY=your_pexels_key_here
+```
 
 ```bash
-npm install
 npm run dev
 ```
 
-See `workflow.md` for the full development workflow and the current backend decryption milestone.
+Dev server runs at `http://localhost:5173`. The Vite dev proxy forwards `/api/*` requests with your keys injected server-side.
+
+## Deployment (Production)
+
+Build the frontend:
+```bash
+npm run build
+```
+
+Set up the Express proxy server:
+```bash
+cd server
+npm install
+```
+
+Create `server/.env`:
+```
+BRAVE_SEARCH_API_KEY=your_brave_key_here
+PEXELS_API_KEY=your_pexels_key_here
+PORT=3000
+```
+
+Start with PM2 (recommended for droplets):
+```bash
+pm2 start ecosystem.config.cjs
+```
+
+Or directly:
+```bash
+node server/index.js
+```
+
+The server serves the built `dist/` as static files and proxies all `/api/*` routes to Brave/Pexels with keys injected from the server environment.
+
+## Privacy
+
+- No query storage or logging
+- Queries proxied anonymously through the server
+- Fonts self-hosted (no Google Fonts CDN)
+- Favicons via DuckDuckGo (not Google)
+- Geolocation uses timezone + Nominatim — raw coordinates never leave the browser
+- Premium encrypted tier in development (client-side libsodium + server-side decryption)

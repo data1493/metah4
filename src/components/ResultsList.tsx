@@ -7,11 +7,12 @@ import NewsResultCard from './NewsResultCard'
 import SkeletonCard from './SkeletonCard'
 import ImagePreviewPanel from './ImagePreviewPanel'
 
-function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onLoadMoreImages }: {
+function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onLoadMoreImages, hasSearched }: {
   imageResults: BraveImageResult[]
   imageLoadingMore: boolean
   imageHasMore: boolean
   onLoadMoreImages: () => void
+  hasSearched: boolean
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null)
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
@@ -49,7 +50,7 @@ function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onL
   }
 
   if (imageResults.length === 0) {
-    return <div className="text-center py-8 text-zinc-500 text-sm">No images found. Try another search.</div>
+    return <div className="text-center py-8 text-zinc-500 text-sm">{hasSearched ? 'No images found. Try a different search.' : 'Search to see image results.'}</div>
   }
 
   const panelOpen = selectedIndex !== null
@@ -122,9 +123,10 @@ interface ResultsListProps {
   imageLoadingMore: boolean
   imageHasMore: boolean
   onLoadMoreImages: () => void
+  hasSearched: boolean
 }
 
-const ResultsList = memo(function ResultsList({ activeTab, results, imageResults, videoResults, newsResults, loading, error, currentPage, onPageChange, imageLoadingMore, imageHasMore, onLoadMoreImages }: ResultsListProps) {
+const ResultsList = memo(function ResultsList({ activeTab, results, imageResults, videoResults, newsResults, loading, error, currentPage, onPageChange, imageLoadingMore, imageHasMore, onLoadMoreImages, hasSearched }: ResultsListProps) {
   if (loading) {
     return (
       <div className="space-y-4" role="status" aria-live="polite" aria-label="Loading search results">
@@ -151,13 +153,14 @@ const ResultsList = memo(function ResultsList({ activeTab, results, imageResults
         imageLoadingMore={imageLoadingMore}
         imageHasMore={imageHasMore}
         onLoadMoreImages={onLoadMoreImages}
+        hasSearched={hasSearched}
       />
     )
   }
 
   if (activeTab === 'videos') {
     if (videoResults.length === 0) {
-      return <div className="text-center py-8 text-zinc-500 text-sm">No videos found. Try another search.</div>
+      return <div className="text-center py-8 text-zinc-500 text-sm">{hasSearched ? 'No videos found. Try a different search.' : 'Search to see video results.'}</div>
     }
     return (
       <div className="space-y-4" role="list" aria-label="Video results">
@@ -170,7 +173,7 @@ const ResultsList = memo(function ResultsList({ activeTab, results, imageResults
 
   if (activeTab === 'news') {
     if (newsResults.length === 0) {
-      return <div className="text-center py-8 text-zinc-500 text-sm">No news found. Try another search.</div>
+      return <div className="text-center py-8 text-zinc-500 text-sm">{hasSearched ? 'No news found. Try a different search.' : 'Search to see news results.'}</div>
     }
     return (
       <div className="space-y-4" role="list" aria-label="News results">
@@ -183,7 +186,7 @@ const ResultsList = memo(function ResultsList({ activeTab, results, imageResults
 
   // 'all' tab (web results)
   if (results.length === 0) {
-    return <div className="text-center py-8 text-zinc-500 text-sm">No results found. Try another search.</div>
+    return <div className="text-center py-8 text-zinc-500 text-sm">{hasSearched ? 'No results found. Try a different search.' : 'Search to explore the web.'}</div>
   }
 
   return (

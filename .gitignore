@@ -17,6 +17,11 @@ dist-ssr
 # Server env
 server/.env
 
+# Internal dev docs
+PROJECT.md
+workflow.md
+location-feature-plan.md
+
 # PM2 logs
 logs/
 

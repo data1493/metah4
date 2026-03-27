@@ -1,11 +1,6 @@
 import { memo } from 'react'
-import type { SearchResult } from '../types'
 
-interface PrivacyProofModalContentProps {
-  firstResult: SearchResult | undefined
-}
-
-const PrivacyProofModalContent = memo(function PrivacyProofModalContent({ firstResult: _firstResult }: PrivacyProofModalContentProps) {
+const PrivacyProofModalContent = memo(function PrivacyProofModalContent() {
   return (
     <>
       <h2 className="text-2xl font-bold mb-6 text-zinc-100">Privacy Proof</h2>

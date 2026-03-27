@@ -26,7 +26,6 @@ function App() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [imageResults, setImageResults] = useState<BraveImageResult[]>([])
-  const imageOffsetRef = useRef(0)
   const imageLoadingRef = useRef(false)
   const imageSeenUrlsRef = useRef<Set<string>>(new Set())
   const pexelsPageRef = useRef(1)
@@ -46,11 +45,31 @@ function App() {
   const [userCountry, setUserCountry] = useState<string | null>(null)
   const [userCity, setUserCity] = useState<string | null>(null)
   const [locationError, setLocationError] = useState('')
+  const [hasSearched, setHasSearched] = useState(false)
+  const lastSearchTimeRef = useRef<number>(0)
+
+  // Restore state from URL on mount
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const q = params.get('q')
+    const tab = params.get('tab') as SearchTab | null
+    const page = parseInt(params.get('page') ?? '1', 10)
+    if (q) {
+      setQuery(q)
+      if (tab && ['all', 'images', 'videos', 'news'].includes(tab)) setActiveTab(tab)
+      if (!isNaN(page) && page >= 1) setCurrentPage(page)
+    }
+  }, [])
 
   useBodyScrollLock(showProofModal || showLogsModal)
 
   const handleSearch = useCallback(async (tab: SearchTab = activeTab, page: number = currentPage) => {
     if (!query.trim()) return
+
+    // 800ms debounce to prevent API spam
+    const now = Date.now()
+    if (now - lastSearchTimeRef.current < 800) return
+    lastSearchTimeRef.current = now
 
     setLoading(true)
     setError('')
@@ -91,7 +110,6 @@ function App() {
         if (mapped.length === 0) setError('No results returned')
       } else if (tab === 'images') {
         setImageResults([])
-        imageOffsetRef.current = 0
         imageLoadingRef.current = false
         imageSeenUrlsRef.current = new Set()
         pexelsPageRef.current = 1
@@ -137,7 +155,13 @@ function App() {
       setLogs(prev => [...prev, { timestamp: new Date(), message: `Error: ${err?.message || 'Network error'}` }])
     } finally {
       setLoading(false)
+      setHasSearched(true)
       setViewMode('results')
+      window.history.pushState(
+        {},
+        '',
+        `?q=${encodeURIComponent(query.trim())}&tab=${tab}&page=${page}`
+      )
     }
   }, [query, activeTab, currentPage, locationEnabled, userCountry, userCity, results.length])
 
@@ -199,18 +223,19 @@ function App() {
     setError('')
     setLogs([])
     setCurrentPage(1)
-    imageOffsetRef.current = 0
     imageLoadingRef.current = false
     imageSeenUrlsRef.current = new Set()
     pexelsPageRef.current = 1
     setImageHasMore(true)
     setImageLoadingMore(false)
+    setHasSearched(false)
   }, [])
 
   const handleGoHome = useCallback(() => {
     resetSearch()
     setViewMode('home')
     setActiveTab('all')
+    window.history.pushState({}, '', '/')
   }, [resetSearch])
 
   const handleShowLogs = useCallback(() => setShowLogsModal(true), [])
@@ -321,13 +346,14 @@ function App() {
               imageLoadingMore={imageLoadingMore}
               imageHasMore={imageHasMore}
               onLoadMoreImages={handleLoadMoreImages}
+              hasSearched={hasSearched}
             />
           </main>
         </>
       )}
 
       <Modal open={showProofModal} onClose={handleCloseProof} ariaLabel="Privacy Proof">
-        <PrivacyProofModalContent firstResult={results[0]} />
+        <PrivacyProofModalContent />
       </Modal>
 
       <Modal open={showLogsModal} onClose={handleCloseLogs} ariaLabel="Activity Logs">

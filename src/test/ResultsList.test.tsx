@@ -20,6 +20,7 @@ const baseProps = {
   imageLoadingMore: false,
   imageHasMore: false,
   onLoadMoreImages: () => {},
+  hasSearched: true,
 }
 
 describe('ResultsList', () => {
