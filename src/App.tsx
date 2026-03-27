@@ -55,7 +55,8 @@ function App() {
       ? `${query.trim()} near ${userCity}`
       : query.trim()
 
-    const offset = (page - 1) * API.RESULTS_PER_PAGE
+    // Brave web search offset is page-based (skip N pages), max 9
+    const offset = page - 1
     const baseParams: Record<string, string | number> = {
       q: effectiveQuery,
       count: API.RESULTS_PER_PAGE,
