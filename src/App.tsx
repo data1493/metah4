@@ -44,6 +44,7 @@ function App() {
   const [showProofModal, setShowProofModal] = useState(false)
   const [showLogsModal, setShowLogsModal] = useState(false)
   const [locationEnabled, setLocationEnabled] = useState(false)
+  const [locationAutoEdit, setLocationAutoEdit] = useState(false)
   const [userCountry, setUserCountry] = useState<string | null>(null)
   const [userCity, setUserCity] = useState<string | null>(null)
   const [locationError, setLocationError] = useState('')
@@ -317,6 +318,7 @@ function App() {
         }
         setLocationEnabled(true)
         setLocationError('')
+        setLocationAutoEdit(false)
       },
       async (err) => {
         if (err.code === err.PERMISSION_DENIED || err.code === 1) {
@@ -329,6 +331,7 @@ function App() {
               setUserCountry(data.country)
               setLocationEnabled(true)
               setLocationError('')
+              setLocationAutoEdit(true)
             } else {
               setLocationError('Location unavailable')
             }
@@ -358,7 +361,8 @@ function App() {
             locationLabel={userCity ?? userCountry}
             locationError={locationError}
             onToggleLocation={handleToggleLocation}
-            onCityEdit={(city) => setUserCity(city)}
+            autoEdit={locationAutoEdit}
+            onCityEdit={(city) => { setUserCity(city); setLocationAutoEdit(false) }}
           />
         </main>
       ) : (
@@ -373,7 +377,8 @@ function App() {
             locationEnabled={locationEnabled}
             locationLabel={userCity ?? userCountry}
             onToggleLocation={handleToggleLocation}
-            onCityEdit={(city) => setUserCity(city)}
+            autoEdit={locationAutoEdit}
+            onCityEdit={(city) => { setUserCity(city); setLocationAutoEdit(false) }}
           />
           <SearchTabs activeTab={activeTab} onTabChange={handleTabChange} />
           <main className="flex-1 max-w-3xl mx-auto w-full px-4 pt-4 relative z-10 pb-16">

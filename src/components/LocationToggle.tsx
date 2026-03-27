@@ -6,9 +6,10 @@ interface LocationToggleProps {
   error: string
   onToggle: () => void
   onCityEdit: (city: string) => void
+  autoEdit: boolean
 }
 
-const LocationToggle = memo(function LocationToggle({ enabled, label, error, onToggle, onCityEdit }: LocationToggleProps) {
+const LocationToggle = memo(function LocationToggle({ enabled, label, error, onToggle, onCityEdit, autoEdit }: LocationToggleProps) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -16,6 +17,13 @@ const LocationToggle = memo(function LocationToggle({ enabled, label, error, onT
   useEffect(() => {
     if (editing) inputRef.current?.focus()
   }, [editing])
+
+  useEffect(() => {
+    if (autoEdit) {
+      setDraft(label ?? '')
+      setEditing(true)
+    }
+  }, [autoEdit, label])
 
   const startEdit = (e: React.MouseEvent) => {
     e.stopPropagation()
