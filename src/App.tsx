@@ -198,7 +198,7 @@ function App() {
           <HomePage
             query={query}
             onQueryChange={setQuery}
-            onSearch={handleSearch}
+            onSearch={() => handleSearch()}
             disabled={!query.trim()}
             onShowProof={handleShowProof}
             locationEnabled={locationEnabled}
@@ -212,7 +212,7 @@ function App() {
           <Header
             query={query}
             onQueryChange={setQuery}
-            onSearch={handleSearch}
+            onSearch={() => handleSearch()}
             disabled={!query.trim()}
             onLogoClick={handleGoHome}
             onShowProof={handleShowProof}
