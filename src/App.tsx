@@ -318,8 +318,22 @@ function App() {
         setLocationEnabled(true)
         setLocationError('')
       },
-      () => {
-        setLocationError('Location permission denied')
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED || err.code === 1) {
+          // Geolocation blocked (HTTP or user denied) — fall back to timezone
+          const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+          const country = timezoneToCountry(tz)
+          if (country) {
+            setUserCountry(country)
+            setUserCity(null)
+            setLocationEnabled(true)
+            setLocationError('')
+          } else {
+            setLocationError('Location unavailable — enable HTTPS or grant permission')
+          }
+        } else {
+          setLocationError('Location unavailable')
+        }
       }
     )
   }, [locationEnabled])
