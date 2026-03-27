@@ -188,10 +188,19 @@ function App() {
         setLogs(prev => [...prev, { timestamp: new Date(), message: `${news.length} news result(s) received` }])
       } else if (tab === 'maps') {
         setMapResults([])
-        const res = await axios.get(API.NOMINATIM, {
-          params: { q: effectiveQuery, format: 'json', limit: 20, addressdetails: 1 },
-        })
-        const places: NominatimResult[] = res.data ?? []
+        // Nominatim doesn't understand "near X" — use comma-separated format and countrycodes for bias
+        const mapQuery = locationEnabled && userCity
+          ? `${query.trim()}, ${userCity}`
+          : query.trim()
+        const mapParams: Record<string, string | number> = {
+          q: mapQuery,
+          format: 'json',
+          limit: 20,
+          addressdetails: 1,
+        }
+        if (locationEnabled && userCountry) mapParams.countrycodes = userCountry.toLowerCase()
+        const res = await axios.get(API.NOMINATIM, { params: mapParams })
+        const places: NominatimResult[] = Array.isArray(res.data) ? res.data : []
         setMapResults(places)
         setLogs(prev => [...prev, { timestamp: new Date(), message: `${places.length} map result(s) received` }])
       }

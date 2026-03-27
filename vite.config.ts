@@ -129,6 +129,19 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/chimp/, ''),
         },
+        '/api/nominatim': {
+          target: 'https://nominatim.openstreetmap.org',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/nominatim/, '/search'),
+          headers: {
+            'User-Agent': 'Metah4SearchEngine/1.0 (metah4.com)',
+            'Accept-Language': 'en',
+          },
+        },
+        '/api/geoip': {
+          target: 'http://localhost:3000',
+          changeOrigin: false,
+        },
       },
     },
   }
