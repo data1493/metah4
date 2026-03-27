@@ -121,6 +121,7 @@ interface ResultsListProps {
   mapResults: NominatimResult[]
   userLat: number | null
   userLon: number | null
+  locationEnabled: boolean
   loading: boolean
   error: string
   currentPage: number
@@ -131,7 +132,7 @@ interface ResultsListProps {
   hasSearched: boolean
 }
 
-const ResultsList = memo(function ResultsList({ activeTab, results, imageResults, videoResults, newsResults, mapResults, userLat, userLon, loading, error, currentPage, onPageChange, imageLoadingMore, imageHasMore, onLoadMoreImages, hasSearched }: ResultsListProps) {
+const ResultsList = memo(function ResultsList({ activeTab, results, imageResults, videoResults, newsResults, mapResults, userLat, userLon, locationEnabled, loading, error, currentPage, onPageChange, imageLoadingMore, imageHasMore, onLoadMoreImages, hasSearched }: ResultsListProps) {
   if (loading) {
     return (
       <div className="space-y-4" role="status" aria-live="polite" aria-label="Loading search results">
@@ -192,7 +193,7 @@ const ResultsList = memo(function ResultsList({ activeTab, results, imageResults
   if (activeTab === 'maps') {
     return (
       <Suspense fallback={<div className="text-center py-8 text-zinc-500 text-sm">Loading map...</div>}>
-        <MapView results={mapResults} hasSearched={hasSearched} userLat={userLat} userLon={userLon} />
+        <MapView results={mapResults} hasSearched={hasSearched} userLat={userLat} userLon={userLon} locationEnabled={locationEnabled} />
       </Suspense>
     )
   }

@@ -1,4 +1,13 @@
 import React, { useState, useCallback, useRef } from 'react'
+
+const COUNTRY_CENTERS: Record<string, [number, number]> = {
+  US: [39.5, -98.35], CA: [56.0, -96.0],  GB: [52.5, -1.5],
+  AU: [-25.0, 134.0], MX: [23.0, -102.0], DE: [51.0, 10.0],
+  FR: [46.0, 2.0],    IT: [42.5, 12.5],   ES: [40.0, -4.0],
+  BR: [-10.0, -55.0], IN: [20.0, 78.0],   JP: [36.0, 138.0],
+  KR: [36.5, 127.5],  CN: [35.0, 105.0],  RU: [61.0, 105.0],
+  ZA: [-29.0, 25.0],  NG: [9.0, 8.0],     EG: [26.0, 30.0],
+}
 import axios from 'axios'
 import { useBodyScrollLock } from './hooks/useBodyScrollLock'
 import { timezoneToCountry } from './utils/timezoneToCountry'
@@ -352,37 +361,43 @@ function App() {
         setLocationError('')
         setLocationAutoEdit(false)
       },
-      async (err) => {
-        if (err.code === err.PERMISSION_DENIED || err.code === 1) {
-          try {
-            const r = await fetch('/api/geoip')
-            const data = await r.json()
-            if (data.city) {
-              const cityLabel = [data.city, data.region].filter(Boolean).join(', ')
-              setUserCity(cityLabel)
-              setUserCountry(data.country)
-              // Forward-geocode the city to get approximate lat/lon for map centering and viewbox
-              try {
-                const geoRes = await fetch(`/api/nominatim?q=${encodeURIComponent(cityLabel)}&format=json&limit=1`)
-                const geoData = await geoRes.json()
-                if (Array.isArray(geoData) && geoData[0]) {
-                  setUserLat(parseFloat(geoData[0].lat))
-                  setUserLon(parseFloat(geoData[0].lon))
-                }
-              } catch { /* silent — map will fall back to result[0] center */ }
-              setLocationEnabled(true)
-              setLocationError('')
-              setLocationAutoEdit(true)
-            } else {
-              setLocationError('Location unavailable')
+      async (_err) => {
+        // Fall back to IP geo for ANY GPS failure (permission denied, unavailable, timeout)
+        try {
+          const r = await fetch('/api/geoip')
+          const data = await r.json()
+          if (data.city) {
+            const cityLabel = [data.city, data.region].filter(Boolean).join(', ')
+            setUserCity(cityLabel)
+            setUserCountry(data.country)
+            // Forward-geocode the city for approximate lat/lon
+            try {
+              const geoRes = await fetch(`/api/nominatim?q=${encodeURIComponent(cityLabel)}&format=json&limit=1`)
+              const geoData = await geoRes.json()
+              if (Array.isArray(geoData) && geoData[0]) {
+                setUserLat(parseFloat(geoData[0].lat))
+                setUserLon(parseFloat(geoData[0].lon))
+              } else {
+                // Forward-geocode returned nothing — use country-center as last resort
+                const fallback = COUNTRY_CENTERS[data.country]
+                if (fallback) { setUserLat(fallback[0]); setUserLon(fallback[1]) }
+              }
+            } catch {
+              // Forward-geocode failed — use country-center as last resort
+              const fallback = COUNTRY_CENTERS[data.country]
+              if (fallback) { setUserLat(fallback[0]); setUserLon(fallback[1]) }
             }
-          } catch {
+            setLocationEnabled(true)
+            setLocationError('')
+            setLocationAutoEdit(true)
+          } else {
             setLocationError('Location unavailable')
           }
-        } else {
+        } catch {
           setLocationError('Location unavailable')
         }
-      }
+      },
+      { timeout: 10000, enableHighAccuracy: false, maximumAge: 30000 }
     )
   }, [locationEnabled])
 
@@ -444,6 +459,7 @@ function App() {
               mapResults={mapResults}
               userLat={userLat}
               userLon={userLon}
+              locationEnabled={locationEnabled}
               loading={loading}
               error={error}
               currentPage={currentPage}

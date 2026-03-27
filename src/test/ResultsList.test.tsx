@@ -16,6 +16,7 @@ const baseProps = {
   mapResults: [],
   userLat: null,
   userLon: null,
+  locationEnabled: false,
   loading: false,
   error: '',
   currentPage: 1,

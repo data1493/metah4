@@ -30,24 +30,15 @@ function FlyTo({ lat, lon }: { lat: number; lon: number }) {
   return null
 }
 
-// Syncs map view to GPS position whenever coords change.
-// MapContainer ignores `center` prop changes after mount, so this is required.
-function GpsCenter({ lat, lon }: { lat: number; lon: number }) {
-  const map = useMap()
-  useEffect(() => {
-    map.setView([lat, lon], 13, { animate: true })
-  }, [lat, lon, map])
-  return null
-}
-
 interface MapViewProps {
   results: NominatimResult[]
   hasSearched: boolean
   userLat: number | null
   userLon: number | null
+  locationEnabled: boolean
 }
 
-const MapView = memo(function MapView({ results: rawResults, hasSearched, userLat, userLon }: MapViewProps) {
+const MapView = memo(function MapView({ results: rawResults, hasSearched, userLat, userLon, locationEnabled }: MapViewProps) {
   const results = Array.isArray(rawResults) ? rawResults : []
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
 
@@ -55,31 +46,40 @@ const MapView = memo(function MapView({ results: rawResults, hasSearched, userLa
 
   const hasGps = userLat !== null && userLon !== null
 
-  // No results and no GPS — show blank state
-  if (results.length === 0 && !hasGps) {
+  // Location not enabled — prompt the user instead of showing a wrong map
+  if (!locationEnabled) {
     return (
-      <div className="text-center py-8 text-zinc-500 text-sm">
-        {hasSearched ? 'No places found. Try a more specific search.' : 'Search to see map results.'}
+      <div className="flex flex-col items-center gap-3 py-12 text-zinc-500 text-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-8 h-8 text-zinc-600">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+        </svg>
+        <p>Enable <span className="text-neon-purple font-medium">Local Results</span> to use Maps</p>
       </div>
     )
   }
 
-  // Center: GPS position takes priority over first result
-  const center: [number, number] = hasGps
-    ? [userLat!, userLon!]
-    : [parseFloat(results[0].lat), parseFloat(results[0].lon)]
+  // Location enabled but coords not yet resolved — show spinner
+  if (!hasGps) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="w-6 h-6 rounded-full border-2 border-neon-purple border-t-transparent animate-spin" aria-label="Locating…" />
+      </div>
+    )
+  }
+
+  // Key on coords so MapContainer remounts with the correct initial center
+  // when coordinates first arrive — avoids the setView race condition
+  const mapKey = `${userLat.toFixed(3)}-${userLon.toFixed(3)}`
 
   return (
     <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
-      {results.length === 0 && hasGps && hasSearched && (
-        <p className="text-zinc-500 text-sm text-center lg:hidden">No places found nearby. Map shows your location.</p>
-      )}
-
       {/* Map */}
       <div className="w-full lg:flex-1 h-72 lg:h-[500px] rounded overflow-hidden border border-zinc-800">
         <MapContainer
-          center={center}
-          zoom={hasGps ? 13 : 12}
+          key={mapKey}
+          center={[userLat, userLon]}
+          zoom={13}
           style={{ height: '100%', width: '100%', background: '#111' }}
           scrollWheelZoom={true}
         >
@@ -90,11 +90,6 @@ const MapView = memo(function MapView({ results: rawResults, hasSearched, userLa
             maxZoom={19}
           />
 
-          {/* Keep map centered on GPS when no pin is selected */}
-          {hasGps && selectedIdx === null && (
-            <GpsCenter lat={userLat!} lon={userLon!} />
-          )}
-
           {/* Fly to selected result pin */}
           {selectedIdx !== null && (
             <FlyTo
@@ -104,15 +99,13 @@ const MapView = memo(function MapView({ results: rawResults, hasSearched, userLa
           )}
 
           {/* "You are here" marker */}
-          {hasGps && (
-            <CircleMarker
-              center={[userLat!, userLon!]}
-              radius={8}
-              pathOptions={{ color: '#d400ff', fillColor: '#d400ff', fillOpacity: 0.85, weight: 2 }}
-            >
-              <Popup>You are here</Popup>
-            </CircleMarker>
-          )}
+          <CircleMarker
+            center={[userLat, userLon]}
+            radius={8}
+            pathOptions={{ color: '#d400ff', fillColor: '#d400ff', fillOpacity: 0.85, weight: 2 }}
+          >
+            <Popup>You are here</Popup>
+          </CircleMarker>
 
           {/* Result pins */}
           {results.map((r, i) => (
@@ -135,7 +128,7 @@ const MapView = memo(function MapView({ results: rawResults, hasSearched, userLa
       </div>
 
       {/* Result list */}
-      {results.length > 0 && (
+      {results.length > 0 ? (
         <div className="lg:w-72 flex flex-col gap-2 overflow-y-auto max-h-72 lg:max-h-[500px] pr-1">
           {results.map((r, i) => (
             <MapResultCard
@@ -147,11 +140,11 @@ const MapView = memo(function MapView({ results: rawResults, hasSearched, userLa
             />
           ))}
         </div>
-      )}
-
-      {results.length === 0 && hasGps && hasSearched && (
-        <p className="text-zinc-500 text-sm text-center hidden lg:block self-center">No places found nearby.<br />Map shows your location.</p>
-      )}
+      ) : hasSearched ? (
+        <p className="text-zinc-500 text-xs self-center text-center lg:w-48">
+          No places found nearby.<br />Map shows your location.
+        </p>
+      ) : null}
     </div>
   )
 })
