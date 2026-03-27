@@ -48,6 +48,8 @@ function App() {
   const [locationAutoEdit, setLocationAutoEdit] = useState(false)
   const [userCountry, setUserCountry] = useState<string | null>(null)
   const [userCity, setUserCity] = useState<string | null>(null)
+  const [userLat, setUserLat] = useState<number | null>(null)
+  const [userLon, setUserLon] = useState<number | null>(null)
   const [locationError, setLocationError] = useState('')
   const [hasSearched, setHasSearched] = useState(false)
   const [isPremium, setIsPremium] = useState(import.meta.env.VITE_PREMIUM_ENABLED === 'true')
@@ -188,7 +190,7 @@ function App() {
         setLogs(prev => [...prev, { timestamp: new Date(), message: `${news.length} news result(s) received` }])
       } else if (tab === 'maps') {
         setMapResults([])
-        // Nominatim doesn't understand "near X" — use comma-separated format and countrycodes for bias
+        // Nominatim doesn't understand "near X" — use comma-separated format
         const mapQuery = locationEnabled && userCity
           ? `${query.trim()}, ${userCity}`
           : query.trim()
@@ -198,7 +200,15 @@ function App() {
           limit: 20,
           addressdetails: 1,
         }
-        if (locationEnabled && userCountry) mapParams.countrycodes = userCountry.toLowerCase()
+        if (locationEnabled && userLat !== null && userLon !== null) {
+          // GPS available: use a ~50km viewbox and require bounded results
+          const delta = 0.45
+          mapParams.viewbox = `${userLon - delta},${userLat - delta},${userLon + delta},${userLat + delta}`
+          mapParams.bounded = 1
+        } else if (locationEnabled && userCountry) {
+          // IP geo only: limit by country code
+          mapParams.countrycodes = userCountry.toLowerCase()
+        }
         const res = await axios.get(API.NOMINATIM, { params: mapParams })
         const places: NominatimResult[] = Array.isArray(res.data) ? res.data : []
         setMapResults(places)
@@ -309,6 +319,8 @@ function App() {
       setLocationEnabled(false)
       setUserCountry(null)
       setUserCity(null)
+      setUserLat(null)
+      setUserLon(null)
       setLocationError('')
       return
     }
@@ -319,6 +331,8 @@ function App() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords
+        setUserLat(latitude)
+        setUserLon(longitude)
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
         const country = timezoneToCountry(tz)
         setUserCountry(country)
