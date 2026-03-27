@@ -5,6 +5,7 @@ import ImageResultCard from './ImageResultCard'
 import VideoResultCard from './VideoResultCard'
 import NewsResultCard from './NewsResultCard'
 import SkeletonCard from './SkeletonCard'
+import ImagePreviewPanel from './ImagePreviewPanel'
 
 function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onLoadMoreImages }: {
   imageResults: BraveImageResult[]
@@ -27,39 +28,69 @@ function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onL
     return () => observer.disconnect()
   }, [imageHasMore, onLoadMoreImages])
 
-  // Reset selection when results change (new search)
+  // Reset selection on new search (when results cleared)
   useEffect(() => {
     setSelectedIndex(null)
   }, [imageResults.length === 0])
+
+  // Pre-load more when nearing the end via panel navigation
+  const handleNext = () => {
+    if (selectedIndex === null) return
+    const next = selectedIndex + 1
+    if (next >= imageResults.length - 3) onLoadMoreImages()
+    if (next < imageResults.length) setSelectedIndex(next)
+  }
+
+  const handlePrev = () => {
+    if (selectedIndex === null || selectedIndex === 0) return
+    setSelectedIndex(selectedIndex - 1)
+  }
 
   if (imageResults.length === 0) {
     return <div className="text-center py-8 text-zinc-500 text-sm">No images found. Try another search.</div>
   }
 
+  const panelOpen = selectedIndex !== null
+
   return (
-    <div>
-      <div className="columns-2 sm:columns-3 lg:columns-4 gap-3" role="list" aria-label="Image results">
-        {imageResults.map((r, i) => (
-          <div key={`${r.url}-${i}`} className="break-inside-avoid mb-3">
-            <ImageResultCard
-              result={r}
-              index={i}
-              onSelect={() => setSelectedIndex(i)}
-              isSelected={i === selectedIndex}
-            />
-          </div>
-        ))}
-      </div>
-      {imageLoadingMore && (
-        <div className="flex justify-center py-6">
-          <div className="w-6 h-6 rounded-full border-2 border-neon-purple border-t-transparent animate-spin" aria-label="Loading more images" />
+    <div className={panelOpen ? 'flex gap-4 items-start' : undefined}>
+      {/* Grid */}
+      <div className="flex-1 min-w-0">
+        <div className="columns-2 sm:columns-3 lg:columns-4 gap-3" role="list" aria-label="Image results">
+          {imageResults.map((r, i) => (
+            <div key={`${r.url}-${i}`} className="break-inside-avoid mb-3">
+              <ImageResultCard
+                result={r}
+                index={i}
+                onSelect={() => setSelectedIndex(i === selectedIndex ? null : i)}
+                isSelected={i === selectedIndex}
+              />
+            </div>
+          ))}
         </div>
-      )}
-      {imageHasMore && !imageLoadingMore && (
-        <div ref={sentinelRef} className="h-16" aria-hidden="true" />
-      )}
-      {!imageHasMore && (
-        <p className="text-center py-6 text-zinc-600 text-xs">All results loaded</p>
+        {imageLoadingMore && (
+          <div className="flex justify-center py-6">
+            <div className="w-6 h-6 rounded-full border-2 border-neon-purple border-t-transparent animate-spin" aria-label="Loading more images" />
+          </div>
+        )}
+        {imageHasMore && !imageLoadingMore && (
+          <div ref={sentinelRef} className="h-16" aria-hidden="true" />
+        )}
+        {!imageHasMore && (
+          <p className="text-center py-6 text-zinc-600 text-xs">All results loaded</p>
+        )}
+      </div>
+
+      {/* Preview panel */}
+      {panelOpen && selectedIndex !== null && (
+        <ImagePreviewPanel
+          result={imageResults[selectedIndex]}
+          onClose={() => setSelectedIndex(null)}
+          onPrev={handlePrev}
+          onNext={handleNext}
+          hasPrev={selectedIndex > 0}
+          hasNext={selectedIndex < imageResults.length - 1}
+        />
       )}
     </div>
   )
