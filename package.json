@@ -12,6 +12,9 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/permanent-marker": "^5.2.7",
     "@tailwindcss/vite": "^4.2.1",
     "axios": "^1.13.6",
     "react": "^19.2.0",

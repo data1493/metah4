@@ -15,6 +15,11 @@ const baseProps = {
   newsResults: [],
   loading: false,
   error: '',
+  currentPage: 1,
+  onPageChange: () => {},
+  imageLoadingMore: false,
+  imageHasMore: false,
+  onLoadMoreImages: () => {},
 }
 
 describe('ResultsList', () => {

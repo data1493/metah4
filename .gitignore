@@ -14,6 +14,12 @@ dist
 dist-ssr
 *.local
 
+# Server env
+server/.env
+
+# PM2 logs
+logs/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

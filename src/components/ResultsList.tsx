@@ -81,6 +81,17 @@ function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onL
         {!imageHasMore && (
           <p className="text-center py-6 text-zinc-600 text-xs">All results loaded</p>
         )}
+        <p className="text-center py-2 text-zinc-600 text-xs">
+          Photos provided by{' '}
+          <a
+            href="https://www.pexels.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-zinc-400"
+          >
+            Pexels
+          </a>
+        </p>
       </div>
 
       {/* Preview panel */}

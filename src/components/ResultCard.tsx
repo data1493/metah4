@@ -17,10 +17,11 @@ const ResultCard = memo(function ResultCard({ result, index }: Props) {
       {/* Domain line with optional local badge */}
       <div className="flex items-center gap-2 mb-1.5">
         <img
-          src={`https://www.google.com/s2/favicons?domain=${result.domain}&sz=16`}
+          src={`https://icons.duckduckgo.com/ip3/${result.domain}.ico`}
           alt=""
           className="w-4 h-4 rounded-sm"
           loading="lazy"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
         />
         <span className="text-zinc-500 text-xs font-mono truncate">{result.domain}</span>
         {result.isLocal && <LocalBadge />}

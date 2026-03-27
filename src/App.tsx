@@ -13,8 +13,12 @@ import PrivacyProofModalContent from './components/PrivacyProofModalContent'
 import ActivityLogsModalContent from './components/ActivityLogsModalContent'
 import BackgroundEffects from './components/BackgroundEffects'
 
-const DevColorPicker = React.lazy(() => import('./components/DevTools').then(m => ({ default: m.DevColorPicker })))
-const DevFontWorkshop = React.lazy(() => import('./components/DevTools').then(m => ({ default: m.DevFontWorkshop })))
+const DevColorPicker = import.meta.env.DEV
+  ? React.lazy(() => import('./components/DevTools').then(m => ({ default: m.DevColorPicker })))
+  : null
+const DevFontWorkshop = import.meta.env.DEV
+  ? React.lazy(() => import('./components/DevTools').then(m => ({ default: m.DevFontWorkshop })))
+  : null
 
 type ViewMode = 'home' | 'results'
 
@@ -330,10 +334,12 @@ function App() {
         <ActivityLogsModalContent logs={logs} onNukeLogs={handleNukeLogs} />
       </Modal>
 
-      <React.Suspense fallback={null}>
-        <DevColorPicker />
-        <DevFontWorkshop />
-      </React.Suspense>
+      {import.meta.env.DEV && DevColorPicker && DevFontWorkshop && (
+        <React.Suspense fallback={null}>
+          <DevColorPicker />
+          <DevFontWorkshop />
+        </React.Suspense>
+      )}
 
       <footer className="fixed bottom-0 left-0 right-0 bg-deep-black/95 backdrop-blur-sm border-t border-zinc-800 py-2 z-20">
         <div className="flex items-center justify-center gap-3 text-xs">

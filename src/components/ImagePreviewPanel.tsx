@@ -51,7 +51,18 @@ export default function ImagePreviewPanel({ result, onClose, onPrev, onNext, has
       >
         {/* Header row */}
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <span className="text-xs text-zinc-500 font-mono truncate flex-1 mr-2">{result.source}</span>
+          <span className="text-xs text-zinc-500 font-mono truncate flex-1 mr-2">
+            {result.source === 'pexels.com' ? (
+              <a
+                href="https://www.pexels.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-zinc-300"
+              >
+                pexels.com
+              </a>
+            ) : result.source}
+          </span>
           <button
             ref={closeRef}
             onClick={onClose}

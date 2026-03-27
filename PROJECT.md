@@ -154,6 +154,69 @@ App.tsx  ─── viewMode: 'home' | 'results'
 | 2026-03-26 | Bug fixes | Proxy route ordering (specific before catch-all); stale closure on empty results; MouseEvent leaking as tab param in onClick handlers; infinite image scroll dedup via ref-based guard |
 | 2026-03-26 | Phase 10 | Image dedup via URL Set ref; masonry CSS columns layout; slide-in preview panel |
 
+---
+
+## Launch Readiness Plan (2026-03-26)
+
+All items below are automated — no new external accounts required. Implemented in 4 phases, each committed separately.
+
+### Launch Phase 1 — Critical Blockers
+
+| # | Item | File(s) |
+|---|------|---------|
+| 1.1 | **Production API proxy** — Express server in `server/` proxying `/api/*` to Brave/Pexels; keys in server env vars, never in client bundle | `server/index.js`, `server/package.json`, `ecosystem.config.js` |
+| 1.2 | **DevTools tree-shaking** — gate `DevColorPicker`/`DevFontWorkshop` behind `import.meta.env.DEV` | `src/App.tsx` |
+| 1.3 | **Self-host fonts** — download Inter, Permanent Marker, JetBrains Mono as WOFF2 → `public/fonts/`; replace Google Fonts `@import` | `src/index.css`, `public/fonts/` |
+| 1.4 | **Replace Google favicon API** → DuckDuckGo `icons.duckduckgo.com/ip3/{domain}.ico` with fallback | `src/components/ResultCard.tsx` |
+| 1.5 | **Pexels legal attribution** — "Photos provided by Pexels" link below image grid; photographer credit in preview panel | `src/components/ResultsList.tsx`, `src/components/ImagePreviewPanel.tsx` |
+| 1.6 | **Error boundary** — `ErrorBoundary.tsx` wrapping `<App />` in `main.tsx` | `src/components/ErrorBoundary.tsx`, `src/main.tsx` |
+| 1.7 | **Fix index.html** — real favicon (`logo2a.png`), title "Metah4 — Private Search", meta description, fix OG image (`logo.png` doesn't exist) | `index.html` |
+
+Commit: `feat: phase 1 — production-ready blockers`
+
+### Launch Phase 2 — Should Fix
+
+| # | Item | File(s) |
+|---|------|---------|
+| 2.1 | **Dead code removal** — delete `useSearch.ts`, `useGeolocation.ts`, `StatusBar.tsx`, `Logo.tsx`, `App.css`; remove `imageOffsetRef` from App.tsx | various |
+| 2.2 | **Gitignore internal docs** — add `PROJECT.md`, `workflow.md`, `location-feature-plan.md` to `.gitignore` | `.gitignore` |
+| 2.3 | **Rewrite README** — accurate description of current non-encrypt branch + deployment instructions | `README.md` |
+| 2.4 | **URL state** — sync `?q=&tab=&page=` via `window.history.pushState`; read on mount for bookmarking/sharing | `src/App.tsx` |
+| 2.5 | **Search debounce** — 800ms cooldown via `useRef<number>` to prevent API spam | `src/App.tsx` |
+| 2.6 | **Fix geolocation auto-fire** — remove `useEffect` that fires permission dialog on mount | `src/hooks/useGeolocation.ts` |
+| 2.7 | **"No results" before search** — show nothing / "Search to explore" instead of "No X found" before first query | `src/components/ResultsList.tsx` |
+| 2.8 | **useBodyScrollLock fix** — `'unset'` → `''` (removes inline style, lets CSS cascade) | `src/hooks/useBodyScrollLock.ts` |
+| 2.9 | **Remove vestigial prop** — strip unused `firstResult` prop from `PrivacyProofModalContent` | `src/components/PrivacyProofModalContent.tsx`, `src/App.tsx` |
+
+Commit: `fix: phase 2 — dead code, URL state, debounce, UX fixes`
+
+### Launch Phase 3 — Polish
+
+| # | Item | File(s) |
+|---|------|---------|
+| 3.1 | **robots.txt + sitemap.xml** | `public/robots.txt`, `public/sitemap.xml` |
+| 3.2 | **WebP background** — convert `bg1.JPG` → `bg1.webp` | `public/images/`, `src/components/BackgroundEffects.tsx` |
+| 3.3 | **Privacy policy page** — static `public/privacy.html`; link from footer | `public/privacy.html` |
+
+Commit: `chore: phase 3 — robots.txt, sitemap, WebP bg, privacy policy`
+
+### Launch Phase 4 — Encryption as Premium Feature
+
+Reintroduce libsodium as an opt-in premium mode (`VITE_PREMIUM_ENABLED=true` env flag). Free tier uses current plain-text proxy; paid tier adds client-side libsodium encryption + server-side decryption endpoint. The `isPremium` boolean is later driveable by a JWT from any payment provider.
+
+| File | Purpose |
+|------|---------|
+| `src/utils/crypto.ts` | libsodium encrypt/decrypt helpers |
+| `server/routes/premium.js` | `/api/chimp/*` endpoint: decrypt query, forward to Brave |
+| `src/components/PremiumBadge.tsx` | Premium lock icon badge |
+| `src/App.tsx` | `isPremium` state; route search through crypto path when enabled |
+
+Re-add `libsodium-wrappers` to `package.json` and `optimizeDeps.exclude` to `vite.config.ts`.
+
+Commit: `feat: phase 4 — encryption as premium feature`
+
+---
+
 ### Phase 10 — Image Search: Dedup + Masonry + Preview Panel
 
 #### Phase 10a — Deduplication
