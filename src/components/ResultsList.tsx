@@ -26,7 +26,7 @@ function ImageResultsSection({ imageResults, imageLoadingMore, imageHasMore, onL
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [imageHasMore, onLoadMoreImages])
+  }, [imageHasMore, onLoadMoreImages, imageResults.length])
 
   // Reset selection on new search (when results cleared)
   useEffect(() => {
