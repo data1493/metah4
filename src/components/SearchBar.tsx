@@ -40,7 +40,7 @@ const SearchBar = memo(function SearchBar({ query, onQueryChange, onSearch, disa
           onChange={(e) => onQueryChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Search the web..."
-          className={`flex-1 bg-transparent text-zinc-100 outline-none placeholder:text-zinc-500 ${isHeader ? 'text-sm py-1' : 'text-base'}`}
+          className={`flex-1 min-w-0 bg-transparent text-zinc-100 outline-none placeholder:text-zinc-500 ${isHeader ? 'text-sm py-1' : 'text-base'}`}
           autoComplete="off"
         />
         <button

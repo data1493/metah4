@@ -403,20 +403,22 @@ function App() {
         </main>
       ) : (
         <>
-          <Header
-            query={query}
-            onQueryChange={setQuery}
-            onSearch={() => handleSearch()}
-            disabled={!query.trim()}
-            onLogoClick={handleGoHome}
-            onShowProof={handleShowProof}
-            locationEnabled={locationEnabled}
-            locationLabel={userCity ?? userCountry}
-            onToggleLocation={handleToggleLocation}
-            autoEdit={locationAutoEdit}
-            onCityEdit={handleCityEdit}
-          />
-          <SearchTabs activeTab={activeTab} onTabChange={handleTabChange} />
+          <div className="sticky top-0 z-30">
+            <Header
+              query={query}
+              onQueryChange={setQuery}
+              onSearch={() => handleSearch()}
+              disabled={!query.trim()}
+              onLogoClick={handleGoHome}
+              onShowProof={handleShowProof}
+              locationEnabled={locationEnabled}
+              locationLabel={userCity ?? userCountry}
+              onToggleLocation={handleToggleLocation}
+              autoEdit={locationAutoEdit}
+              onCityEdit={handleCityEdit}
+            />
+            <SearchTabs activeTab={activeTab} onTabChange={handleTabChange} />
+          </div>
           <main className="flex-1 max-w-3xl mx-auto w-full px-4 pt-4 relative z-10 pb-16">
             {/* Activity logs */}
             <div className="flex items-center justify-end mb-3">
@@ -467,7 +469,7 @@ function App() {
         </React.Suspense>
       )}
 
-      <footer className="fixed bottom-0 left-0 right-0 bg-deep-black/95 backdrop-blur-sm border-t border-zinc-800 py-2 z-20">
+      <footer className="fixed bottom-0 left-0 right-0 bg-deep-black/95 backdrop-blur-sm border-t border-zinc-800 z-20" style={{ paddingTop: '0.5rem', paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}>
         <div className="flex items-center justify-center gap-3 text-xs">
           <span className="text-zinc-500">Powered by Brave Search</span>
           <span className="text-zinc-700">·</span>

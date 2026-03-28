@@ -37,9 +37,9 @@ const SearchTabs = memo(function SearchTabs({ activeTab, onTabChange }: SearchTa
   }, [activeTab, onTabChange])
 
   return (
-    <nav aria-label="Search categories" className="border-b border-zinc-800 overflow-x-auto">
-      <div className="max-w-5xl mx-auto px-4">
-        <ul className="flex gap-6" role="tablist" ref={tabsRef} onKeyDown={handleKeyDown}>
+    <nav aria-label="Search categories" className="bg-deep-black/90 backdrop-blur-md border-b border-zinc-800">
+      <div className="max-w-5xl mx-auto px-4 overflow-x-auto">
+        <ul className="flex gap-6 min-w-max" role="tablist" ref={tabsRef} onKeyDown={handleKeyDown}>
           {TABS.map(({ id, label }) => {
             const isActive = activeTab === id
             return (
@@ -49,7 +49,7 @@ const SearchTabs = memo(function SearchTabs({ activeTab, onTabChange }: SearchTa
                   aria-selected={isActive}
                   tabIndex={isActive ? 0 : -1}
                   onClick={() => onTabChange(id)}
-                  className={`relative py-3 text-sm font-medium transition-colors whitespace-nowrap ${
+                  className={`relative py-3.5 text-sm font-medium transition-colors whitespace-nowrap ${
                     isActive
                       ? 'text-neon-purple'
                       : 'text-zinc-500 hover:text-zinc-300'
